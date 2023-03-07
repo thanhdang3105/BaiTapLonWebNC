@@ -1,0 +1,172 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Account</title>
+    <link rel="stylesheet" href="../style/GlobalStyles.css" />
+    <link rel="stylesheet" href="../style/UserAccount.css" />
+    <script src="../script/UserAccount.js" defer ></script>
+</head>
+<body>
+    <div class="wrapper">
+        <div class="wrapper_body">
+            <div class="switch_view">Chào mừng bạn trở lại với Web Sách</div>
+            <div class="body_content">
+                <form id="register" method="post" onsubmit="submitForm(event)">
+                    <h1 class="content_header">Đăng nhập</h1>
+                    <label for="fullname">Name</label>
+                    <div class="wrapper_input">
+                        <input name="fullname" type="text" title="Vui lòng nhập họ và tên  của bạn" placeholder="Họ và tên" required />
+                        <div class="error_info">
+                            !
+                            <span>Error</span>
+                        </div>
+                    </div>
+                    <label for="birthday">Ngày sinh</label>
+                    <div class="wrapper_input">
+                        <input name="birthday" type="date" title="Vui lòng chọn ngày sinh của bạn" placeholder="Ngày sinh" required />
+                        <div class="error_info">
+                            !
+                            <span>Error</span>
+                        </div>
+                    </div>
+                    <label for="username">Email</label>
+                    <div class="wrapper_input">
+                        <input name="username" type="email" title="Vui lòng nhập Tài khoản của bạn" placeholder="VD: NguyenVanA@gmail.com" required />
+                        <div class="error_info">
+                            !
+                            <span>Error</span>
+                        </div>
+                    </div>
+                    <label for="password">Password</label>
+                    <div class="wrapper_input">
+                        <input name="password" type="password" title="Vui lòng nhập mật khẩu của bạn" placeholder="Nhập mật khẩu" required />
+                        <div class="error_info">
+                            !
+                            <span>Error</span>
+                        </div>
+                    </div>
+                    <label for="password-check">Re-Password</label>
+                    <div class="wrapper_input">
+                        <input name="password-check" type="password" title="Vui lòng nhập lại mật khẩu của bạn" placeholder="Nhập lại mật khẩu" required />
+                        <div class="error_info">
+                            !
+                            <span>Error</span>
+                        </div>
+                    </div>
+                    <label for="sex">Sex</label>
+                    <div class="wrapper_input">
+                        <input name="sex" type="radio" title="Giới tính" checked value="male" required />
+                        <input name="sex" type="radio" title="Giới tính"  value="female" required />
+                    </div>
+                    <button type="submit">Đăng ký</button>
+                    <p class="text_link" onclick="toggleAction()">Bạn đã có tài khoản?</p>
+                </form>
+            </div>
+            <div class="body_content">
+                <form id="login" method="post" onsubmit="submitForm(event)">
+                    <h1 class="content_header">Đăng nhập</h1>
+                    <label for="username">Email</label>
+                    <div class="wrapper_input">
+                        <input name="username" type="email" title="Vui lòng nhập Tài khoản của bạn" placeholder="VD: NguyenVanA@gmail.com" required />
+                        <div class="error_info">
+                            !
+                            <span>Error</span>
+                        </div>
+                    </div>
+                    <label for="password">Password</label>
+                    <div class="input_box">
+                        <div class="wrapper_input">
+                            <input name="password" type="password" title="Nhập mật khẩu" placeholder="Mật Khẩu" required />
+                            <div class="error_info">
+                                !
+                                <span>Error</span>
+                            </div>
+                        </div>
+                        <p class="text_link">Quên mật khẩu!</p>
+                    </div>
+                    <button type="submit">Đăng nhập</button>
+                    <p class="text_link" onclick="toggleAction()">Bạn chưa có tài khoản?</p>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+
+        function checkValue(inputName, value, formData) {
+            let isError = false
+            if (inputName === 'birthday') {
+                const age = new Date(value) - Date.now()
+                if (age > -(1000 * 60 * 60 * 24 * 365 * 10) && age < 0) {
+                    setErrorInfo(inputName, 'Bạn còn chưa đủ 10 tuổi cơ hic :<');
+                    isError = true
+                } else if (age > 0) {
+                    setErrorInfo(inputName, 'Bạn còn chưa đẻ cơ hic :<');
+                    isError = true
+                }
+            } else if (inputName === 'password-check') {
+                if (value !== formData.get('password')) {
+                    setErrorInfo(inputName, 'Mật khẩu không khớp!');
+                    isError = true
+                }
+            }
+            return isError
+        }
+
+
+        async function submitForm(event) {
+            event.preventDefault()
+            const button = event.target.querySelector('button[type=submit')
+            const form = event.target
+            if (!form) return alert('System Error')
+            button.disabled = true;
+            const formData = new FormData(form)
+            let data = {}
+            let isError = false            
+            for (var p of formData) {
+                let name = p[0];
+                let value = p[1];
+                if (checkValue(name, value, formData)) {
+                    isError = true
+                }
+                data[name] = value
+            }
+            if (isError) {
+                return false
+            }
+            const res = await fetch('/server/HandleAccount.aspx?action=' + form.id, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    contentType: 'application/json'
+                    }
+            })
+            if (res.status === 200) {
+                let rs
+                try {
+                    rs = await res.json();
+                    rs = rs.data
+                } catch (err) {
+                    console.error(err)
+                    rs = await res.text()
+                }
+                alert('Login Success')
+                window.location.href = '/view/HomePage.html'
+            } else {
+                let rs
+                try {
+                    rs = await res.json();
+                    rs = rs.msg
+                } catch (err) {
+                    console.error(err)
+                    rs = await res.text()
+                }
+                alert(rs)
+            }
+            button.disabled = false;
+            form.reset()
+        } 
+    </script>
+</body>
+</html>
