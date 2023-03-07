@@ -1,6 +1,8 @@
-﻿using Newtonsoft.Json.Linq;
+﻿using BaiTapLon.server;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.Configuration;
 using System.Data;
 using System.Data.SqlClient;
@@ -21,10 +23,11 @@ namespace BaiTapLon.server
         protected void Page_Load(object sender, EventArgs e)
         {
             con.Open();
+            Response.ContentType = "application/json";
             String action = Request.QueryString["action"];
             switch (action) {
                 case "register":
-
+                    Register(Request.Form);
                     break;
                 case "login":
                     String userName = Request.Form["username"];
@@ -32,7 +35,6 @@ namespace BaiTapLon.server
                     Login(userName, password);
                     break;
                 default:
-                    Response.ContentType = "application/json";
                     Response.StatusCode = 400;
                     Response.Write("{\"msg\":\"Action not supported with route!\"}");
                     Response.End();
@@ -42,35 +44,11 @@ namespace BaiTapLon.server
             con.Close();
         }
 
-        public class user
+        public void Login(string username, string password)
         {
-            public int ID { get; set; }
-            public string username { get; set; }
-            public string birthday { get; set; }
-            public string sex { get; set; }
-            public user(int id, string userName, string birthDay, string Sex)
-            {
-                this.ID = id;
-                this.username = userName;
-                this.birthday = birthDay;
-                this.sex = Sex;
-            }
-            public string converString ()
-            {
-                return "{\"id\":\"" + this.ID + "\", \"username\":\"" +this.username +"\",\"birthDay\":\""+this.birthday+"\"" +
-                    ",\"sex\":\""+this.sex+"\"}";
-            }
-        }
-
-        private void Login(string username, string password)
-        {
-            Response.ContentType = "application/json";
             string errorMsg = "Login Failed!";
             if (username != null && password != null)
             {
-                string encode = encodePassword(password);
-
-                string decode = dencodePassword(encode);
 
                 SqlCommand cmd = new SqlCommand("select * from Auth where username='"+username+"'", con);
 
@@ -78,19 +56,18 @@ namespace BaiTapLon.server
 
                 string userID = null;
 
-
-
                 while (reader.Read())
                 {
-                    if (reader[1].ToString() == username && reader[2].ToString() == password)
+                    Auth auth = new Auth((int)reader["ID"], reader["username"].ToString(), reader["password"].ToString(), (int)reader["userID"]);
+                    if (auth.username == username && auth.checkPassword(password))
                     {
-                        userID = reader[3].ToString();
+                        userID = auth.userID.ToString();
                     }
                 }
 
                 reader.Close();
 
-                user userInfo = null;
+                User userInfo = null;
                 if (userID != null)
                 {
                     cmd = new SqlCommand("select * from Users where ID=" + userID, con);
@@ -99,9 +76,8 @@ namespace BaiTapLon.server
 
                     while (reader.Read())
                     {
-                        userInfo = new user((int)reader["ID"], reader["name"].ToString(), reader["birthday"].ToString(), reader["sex"].ToString());
+                        userInfo = new User((int)reader["ID"], reader["name"].ToString(), reader["birthday"].ToString(), reader["sex"].ToString());
                     }
-
 
                 }
                 if (userInfo != null)
@@ -119,19 +95,55 @@ namespace BaiTapLon.server
             Response.End();
         }
 
-        private string encodePassword(string password)
+        public void Register (NameValueCollection formData)
         {
-            byte[] bytes = Encoding.UTF8.GetBytes(password);
+            string username = formData["username"];
+            string errorMsg = null;
 
-            string encoded = Convert.ToBase64String(bytes);
-            return encoded;
-        }
-        private string dencodePassword(string passwordEncoded)
-        {
-            byte[] bytes = Convert.FromBase64String(passwordEncoded);
+            SqlCommand cmd = new SqlCommand("select * from Auth where username='" + username + "'", con);
 
-            string decoded = Encoding.UTF8.GetString(bytes);
-            return decoded;
+            SqlDataReader reader = cmd.ExecuteReader();
+
+            while(reader.Read())
+            {
+
+                if (reader["username"].ToString() == username)
+                {
+                    errorMsg = username + " Account is existed!";
+                }
+            }
+
+            if(errorMsg != null)
+            {
+                Response.StatusCode = 400;
+                Response.Write("{\"msg\":\"" + errorMsg + "\"}");
+                Response.End();
+            }
+
+            reader.Close(); 
+
+            cmd.Cancel();
+
+            cmd = new SqlCommand("INSERT INTO Users (name,birthday,sex)" +
+                " OUTPUT Inserted.ID " +
+                "VALUES ('" + formData["fullname"] + "','" + formData["birthday"] + "','" + formData["sex"] + "')", con);
+            int newUserId = (int)cmd.ExecuteScalar();
+
+            cmd.Cancel();
+
+            Auth auth = new Auth(1, username, formData["password"],newUserId);
+
+            SqlCommand cmd1 = new SqlCommand("INSERT INTO Auth (username,password,userID)" +
+                " OUTPUT Inserted.ID " +
+                "VALUES ('" + username + "','" + auth.password + "', " + newUserId + ")", con);
+
+            int newAccount = (int)cmd1.ExecuteScalar();
+
+            User userInfo = new User(newUserId, formData["fullname"], formData["birthday"], formData["sex"]);
+
+
+            Response.Write("{\"data\":" + userInfo.converString().ToString() + "}");
+            Response.End();
         }
     }
 }

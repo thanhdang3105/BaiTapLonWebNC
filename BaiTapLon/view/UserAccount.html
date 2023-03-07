@@ -135,37 +135,52 @@
             if (isError) {
                 return false
             }
-            const res = await fetch('/server/HandleAccount.aspx?action=' + form.id, {
-                method: 'POST',
-                body: formData,
-                headers: {
-                    contentType: 'application/json'
-                    }
-            })
-            if (res.status === 200) {
-                let rs
-                try {
-                    rs = await res.json();
-                    rs = rs.data
-                } catch (err) {
-                    console.error(err)
-                    rs = await res.text()
+
+            let xmlhttp = new XMLHttpRequest();
+            xmlhttp.onreadystatechange = function () {
+                if (this.readyState == 4 && this.status == 200) {
+                    console.log(this.response)
+
+                    form.reset()
+
+                } else {
+                    console.log(this.response)
                 }
-                alert('Login Success')
-                window.location.href = '/view/HomePage.html'
-            } else {
-                let rs
-                try {
-                    rs = await res.json();
-                    rs = rs.msg
-                } catch (err) {
-                    console.error(err)
-                    rs = await res.text()
-                }
-                alert(rs)
-            }
-            button.disabled = false;
-            form.reset()
+
+                button.disabled = false;
+            };
+            xmlhttp.open("POST", '/server/HandleAccount.aspx?action=' + form.id, true);
+            xmlhttp.send(formData);
+
+            //const res = await fetch('/server/HandleAccount.aspx?action=' + form.id, {
+            //    method: 'POST',
+            //    body: formData,
+            //    headers: {
+            //        contentType: 'application/json'
+            //        }
+            //})
+            //if (res.status === 200) {
+            //    let rs
+            //    try {
+            //        rs = await res.json();
+            //        rs = rs.data
+            //    } catch (err) {
+            //        console.error(err)
+            //        rs = await res.text()
+            //    }
+            //    alert('Login Success')
+            //    window.location.href = '/view/HomePage.html'
+            //} else {
+            //    let rs
+            //    try {
+            //        rs = await res.json();
+            //        rs = rs.msg
+            //    } catch (err) {
+            //        console.error(err)
+            //        rs = await res.text()
+            //    }
+            //    alert(rs)
+            //}
         } 
     </script>
 </body>
