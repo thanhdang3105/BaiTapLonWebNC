@@ -6,6 +6,7 @@
     <link rel="stylesheet" href="../style/HomePage.css" />
     <link rel="stylesheet" href="../style/GlobalStyles.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.3.0/css/all.min.css" integrity="sha512-SzlrxWUlpfuzQ+pcUCosxcglQRNAq/DZjVsC0lE40xsADsfeQoEypE+enwcOiGjk/bSuGGKHEyjSoQ1zVisanQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <script src="../script/HomePage.js" defer></script>
 </head>
 <body>
     <div class="container">
@@ -17,30 +18,34 @@
                     </a>
                 </div>
                 <div class="header_search">
-                    <input type="text" placeholder="Search..." class="input_search" />
-                    <button class="header_btn-search" type="button" title="Search"><i class="fa fa-search"></i></button>
+                    <div class="wrapper_search">
+                        <input type="text" placeholder="Search..." class="input_search" />
+                        <ul class="menu_search">
+                            No Data
+                        </ul>
+                    </div>
+                    <button class="header_btn-search btn_icon" type="button" title="Search"><i class="fa fa-search"></i></button>
                 </div>
-                <div class="header_account">
-                    <a class="text_link" href="">Đăng nhập</a>/
-                    <a class="text_link" href="">Đăng ký</a>
+                <div id="userInfo_header" class="header_account">
+                    <div class="wrapper_menu">
+                        <button class="btn_icon" type="button" title="User"><i class="fa-regular fa-user"></i></button>
+                        <ul class="header_menuAccount">
+                            
+                        </ul>
+                    </div>
                 </div>
             </div>
             <nav class="sub_header">
-                <a href="">All</a>
-                <a href="">All</a>
-                <a href="">All</a>
-                <a href="">All</a>
-                <a href="">All</a>
-                <a href="">All</a>
-                <a href="">All</a>
-                <a href="">All</a>
+                <a href="" class="sub_header-item text_link">Tất cả</a>
+                <a href="" class="sub_header-item text_link">HOT</a>
+                <a href="" class="sub_header-item text_link">Hành động</a>
+                <a href="" class="sub_header-item text_link">Tâm lí</a>
+                <a href="" class="sub_header-item text_link">Kịch tính</a>
+                <a href="" class="sub_header-item text_link">Tình yêu</a>
+                <a href="" class="sub_header-item text_link">Viẽn tưởng</a>
+                <a href="" class="sub_header-item text_link">Trẻ em</a>
             </nav>
         </header>
     </div>
-    <script>
-        window.onpopstate = (e) => {
-            console.log(e)
-        }
-    </script>
 </body>
 </html>

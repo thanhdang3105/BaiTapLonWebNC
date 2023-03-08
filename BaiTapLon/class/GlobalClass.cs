@@ -13,21 +13,28 @@ namespace BaiTapLon.server {
     {
         public int ID { get; set; }
         public string name { get; set; }
+        public string email { get; set; }
         public string birthday { get; set; }
+        public string phone { get; set; }
         public string sex { get; set; }
-        public User(int id, string Name, string Birthday, string sex)
+        public User(int id, string Name, string Email, string Birthday, string sex, string Phone)
         {
             this.ID = id;
             this.name = Name;
+            this.email = Email;
             this.birthday = Birthday;
             this.sex = sex;
+            this.phone = Phone;
         }
         public string converString()
         {
-            return "{\"id\":\"" + this.ID + "\", " +
+            string data = "{\"id\":\"" + this.ID + "\", " +
                 "\"name\":\"" + this.name + "\"," +
-                "\"birthDay\":\"" + this.birthday + "\"" +
-                ",\"sex\":\"" + this.sex + "\"}";
+                "\"email\":\"" + this.email + "\"," +
+                "\"birthDay\":\"" + this.birthday + "\"," +
+                "\"phone\":\"" + this.phone + "\"," +
+                "\"sex\":\"" + this.sex + "\"}";
+            return data.ToString();
         }
     }
 
@@ -37,45 +44,22 @@ namespace BaiTapLon.server {
         public string username { get; set; }
         public string password { get; set; }
         public int userID { get; set; }
-        public Auth(int id, string UserName, string Password, int Userid)
+        public DateTime createdAt { get; set; }
+        public Auth(int id, string UserName, string Password, int Userid, DateTime createdAt)
         {
             this.ID = id;
             this.username = UserName;
-            this.password = (string)encodePassword(Password).Normalize();
+            this.password = Password;
             this.userID = Userid;
+            this.createdAt = createdAt;
         }
         public string converString()
         {
             return "{\"id\":\"" + this.ID + "\", " +
                 "\"username\":\"" + this.username + "\"," +
-                "\"password\":\"" + this.password + "\"" +
-                ",\"userID\":\"" + this.userID + "\"}";
+                "\"userID\":\"" + this.userID + "\"" +
+                ",\"createdAt\":\"" + this.createdAt.ToString() + "\"}";
         }
-        public bool checkPassword(string password)
-        {
-            if (decodePassword() == password)
-            {
-                return true;
-            } else
-            {
-                return false;
-            }
-        }
-        private string encodePassword(string password)
-        {
-            byte[] bytes = Encoding.UTF8.GetBytes(password);
-
-            string encoded = Convert.ToBase64String(bytes);
-            return encoded.ToString();
-        }
-        private string decodePassword()
-        {
-            byte[] bytes = Convert.FromBase64String(this.password);
-
-            string decoded = Encoding.UTF8.GetString(bytes);
-            return decoded;
-        }
-
     }
 
 }

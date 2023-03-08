@@ -38,14 +38,40 @@
 }
 
 .header_search{
-    width: 40%;
+    width: 55%;
     display: flex;
     align-items: center;
     justify-content: flex-end;
     gap: 10px
 }
 
-.input_search{
+.wrapper_search{
+    width:100%;
+    height: 100%;
+    position: relative;
+}
+
+.wrapper_search > .menu_search {
+    position: absolute;
+    width: 100%;
+    min-height: 100%;
+    height: max-content;
+    max-height: 50vh;
+    overflow: auto;
+    border: 1px solid var(--border-color);
+    background-color: white;
+    z-index: 2;
+    box-shadow: 0 0 10px 0 var(--shadow-color);
+    padding: 10px;
+    margin: 0;
+    list-style: none;
+}
+
+.wrapper_search > .input_search:not(:focus) + .menu_search {
+    display: none;
+}
+
+.input_search {
     width: 100%;
     padding: 10px;
     border: 2px solid var(--border-color);
@@ -66,10 +92,63 @@
 }
 
 .header_account {
-    width: 25%;
+    width: 20%;
     display: flex;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-end;
+}
+
+.wrapper_menu{
+    position: relative;
+}
+
+.wrapper_menu > .header_menuAccount {
+    position:absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: max-content;
+    min-width: 100px;
+    background-color: white;
+    list-style: none;
+    padding: 0;
+    border: 1px solid var(--border-color);
+    text-align: center;
+    z-index: 2;
+    display: none;
+}
+
+.wrapper_menu:hover > .header_menuAccount{
+    display: block;
+}
+
+.wrapper_menu > .header_menuAccount::after {
+    position: absolute;
+    content: "";
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 50px;
+    height: 12px;
+    background-color: transparent;
+}
+
+.wrapper_menu > .header_menuAccount > .menu_item {
+    padding: 10px;
+    cursor: pointer;
+}
+
+.menu_item + .menu_item{
+    border-top: 1px solid var(--border-color);
+}
+
+.menu_item:hover{
+    background-color: var(--hover-color);
+    color: white;
+}
+
+.menu_item:hover > a.text_link{
+    color: white;
 }
 
 .text_link{
@@ -85,13 +164,24 @@
     position: fixed;
     display: flex;
     width: 100%;
+    min-width: 55%;
     top: var(--header-height);
     left: 0;
     align-items: center;
-    justify-content: space-between;
-    padding: 10px 15%;
+    justify-content: center;
+    padding: 0 15%;
+    gap: 10px;
     background-color: var(--background-color);
     border-bottom: 1px solid var(--border-color);
     box-shadow: 0 0 10px 0 var(--shadow-color);
+}
+
+.sub_header > .sub_header-item {
+    padding: 10px;
+}
+
+.sub_header > .sub_header-item:hover {
+    background-color: var(--hover-color);
+    color: white;
 }
 

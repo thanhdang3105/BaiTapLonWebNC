@@ -5,7 +5,7 @@
     <title>Account</title>
     <link rel="stylesheet" href="../style/GlobalStyles.css" />
     <link rel="stylesheet" href="../style/UserAccount.css" />
-    <script src="../script/UserAccount.js" defer ></script>
+    <script src="../script/UserAccount.js" defer></script>
 </head>
 <body>
     <div class="wrapper">
@@ -25,6 +25,14 @@
                     <label for="birthday">Ngày sinh</label>
                     <div class="wrapper_input">
                         <input name="birthday" type="date" title="Vui lòng chọn ngày sinh của bạn" placeholder="Ngày sinh" required />
+                        <div class="error_info">
+                            !
+                            <span>Error</span>
+                        </div>
+                    </div>
+                    <label for="phone">Phone Number</label>
+                    <div class="wrapper_input">
+                        <input name="phone" type="text" title="Vui lòng nhập số điện thoại của bạn" placeholder="Phone number" required />
                         <div class="error_info">
                             !
                             <span>Error</span>
@@ -54,10 +62,16 @@
                             <span>Error</span>
                         </div>
                     </div>
-                    <label for="sex">Sex</label>
-                    <div class="wrapper_input">
-                        <input name="sex" type="radio" title="Giới tính" checked value="male" required />
-                        <input name="sex" type="radio" title="Giới tính"  value="female" required />
+                    <div class="wrapper_checkbox">
+                        <label for="sex">Sex:</label>
+                        <div class="checkbox_radio">
+                            <input name="sex" type="radio" title="Giới tính" checked value="male" required />
+                            <label for="sex">Nam</label>
+                        </div>
+                        <div class="checkbox_radio">
+                            <input name="sex" type="radio" title="Giới tính" checked value="female" required />
+                            <label for="sex">Nữ</label>
+                        </div>
                     </div>
                     <button type="submit">Đăng ký</button>
                     <p class="text_link" onclick="toggleAction()">Bạn đã có tài khoản?</p>
@@ -91,97 +105,5 @@
             </div>
         </div>
     </div>
-
-    <script>
-
-        function checkValue(inputName, value, formData) {
-            let isError = false
-            if (inputName === 'birthday') {
-                const age = new Date(value) - Date.now()
-                if (age > -(1000 * 60 * 60 * 24 * 365 * 10) && age < 0) {
-                    setErrorInfo(inputName, 'Bạn còn chưa đủ 10 tuổi cơ hic :<');
-                    isError = true
-                } else if (age > 0) {
-                    setErrorInfo(inputName, 'Bạn còn chưa đẻ cơ hic :<');
-                    isError = true
-                }
-            } else if (inputName === 'password-check') {
-                if (value !== formData.get('password')) {
-                    setErrorInfo(inputName, 'Mật khẩu không khớp!');
-                    isError = true
-                }
-            }
-            return isError
-        }
-
-
-        async function submitForm(event) {
-            event.preventDefault()
-            const button = event.target.querySelector('button[type=submit')
-            const form = event.target
-            if (!form) return alert('System Error')
-            button.disabled = true;
-            const formData = new FormData(form)
-            let data = {}
-            let isError = false            
-            for (var p of formData) {
-                let name = p[0];
-                let value = p[1];
-                if (checkValue(name, value, formData)) {
-                    isError = true
-                }
-                data[name] = value
-            }
-            if (isError) {
-                return false
-            }
-
-            let xmlhttp = new XMLHttpRequest();
-            xmlhttp.onreadystatechange = function () {
-                if (this.readyState == 4 && this.status == 200) {
-                    console.log(this.response)
-
-                    form.reset()
-
-                } else {
-                    console.log(this.response)
-                }
-
-                button.disabled = false;
-            };
-            xmlhttp.open("POST", '/server/HandleAccount.aspx?action=' + form.id, true);
-            xmlhttp.send(formData);
-
-            //const res = await fetch('/server/HandleAccount.aspx?action=' + form.id, {
-            //    method: 'POST',
-            //    body: formData,
-            //    headers: {
-            //        contentType: 'application/json'
-            //        }
-            //})
-            //if (res.status === 200) {
-            //    let rs
-            //    try {
-            //        rs = await res.json();
-            //        rs = rs.data
-            //    } catch (err) {
-            //        console.error(err)
-            //        rs = await res.text()
-            //    }
-            //    alert('Login Success')
-            //    window.location.href = '/view/HomePage.html'
-            //} else {
-            //    let rs
-            //    try {
-            //        rs = await res.json();
-            //        rs = rs.msg
-            //    } catch (err) {
-            //        console.error(err)
-            //        rs = await res.text()
-            //    }
-            //    alert(rs)
-            //}
-        } 
-    </script>
 </body>
 </html>

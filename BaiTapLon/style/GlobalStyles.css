@@ -20,3 +20,20 @@ p.text_link{
     cursor: pointer;
     white-space: nowrap;
 }
+
+button.btn_icon {
+    width: 40px;
+    height: 40px;
+    border: none;
+    background-color: var(--background-color);
+    cursor: pointer;
+    border-radius: 99px;
+    padding: 12px;
+    font-size: 16px;
+    line-height: 1;
+}
+
+button.btn_icon:hover{
+    background-color: var(--hover-color);
+    color: var(--background-color);
+}

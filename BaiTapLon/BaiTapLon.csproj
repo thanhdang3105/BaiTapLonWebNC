@@ -80,6 +80,8 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="script\HomePage.js" />
+    <Content Include="script\request.js" />
     <Content Include="script\UserAccount.js" />
     <Content Include="server\HandleAccount.aspx" />
     <Content Include="style\GlobalStyles.css" />
@@ -90,6 +92,7 @@
     <Content Include="Web.config" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="class\Authoziration.cs" />
     <Compile Include="class\GlobalClass.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="server\HandleAccount.aspx.cs">

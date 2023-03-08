@@ -1,13 +1,20 @@
-﻿(function handleInputChange() {
-    const listInput = document.querySelectorAll('div.wrapper_body input')
-    for (let input of listInput) {
-        input.oninput = (event) => {
-            if (event.target.value) {
-                setErrorInfo(event.target.name, undefined, false)
-            }
+﻿
+function toggleAction() {
+    const switchView = document.querySelector('div.switch_view');
+    const formLogin = document.querySelector('form#login');
+    const formRegister = document.querySelector('form#register');
+    if (switchView) {
+        if (switchView.classList.contains('right')) {
+            switchView.classList.remove('right')
+            switchView.innerText = 'Chào mừng bạn trở lại với Web Sách'
+            resetForm(formRegister)
+        } else {
+            switchView.classList.add('right')
+            switchView.innerText = 'Tạo tài khoản để trở thành 1 thành viên của Web Sách'
+            resetForm(formLogin)
         }
     }
-})()
+}
 
 function setErrorInfo(inputName, errMsg = 'Error', isErr = true) {
     const input = document.querySelector(`input[name=${inputName}]`)
@@ -34,22 +41,7 @@ function setErrorInfo(inputName, errMsg = 'Error', isErr = true) {
     }
 }
 
-function toggleAction() {
-    const switchView = document.querySelector('div.switch_view');
-    const formLogin = document.querySelector('form#login');
-    const formRegister = document.querySelector('form#register');
-    if (switchView) {
-        if (switchView.classList.contains('right')) {
-            switchView.classList.remove('right')
-            switchView.innerText = 'Chào mừng bạn trở lại với Web Sách'
-            resetForm(formRegister)
-        } else {
-            switchView.classList.add('right')
-            switchView.innerText = 'Tạo tài khoản để trở thành 1 thành viên của Web Sách'
-            resetForm(formLogin)
-        }
-    }
-}
+
 
 function resetForm(form) {
     form.reset();
@@ -58,3 +50,136 @@ function resetForm(form) {
         setErrorInfo(input.name, undefined, false)
     }
 }
+
+window.addEventListener("DOMContentLoaded", (e) => {
+    if (window.location.search && window.location.search.includes('action')) {
+        const action = window.location.search.split('=')[1]
+        if (action == 'register') {
+            toggleAction()
+        }
+    }
+    (() => {
+        const listInput = document.querySelectorAll('div.wrapper_body input')
+        for (let input of listInput) {
+            input.oninput = (event) => {
+                if (event.target.value) {
+                    setErrorInfo(event.target.name, undefined, false)
+                }
+            }
+        }
+    })()
+})
+
+function checkValue(inputName, value, formData) {
+    let isError = false
+    if (inputName === 'birthday') {
+        const age = new Date(value) - Date.now()
+        if (age > -(1000 * 60 * 60 * 24 * 365 * 10) && age < 0) {
+            setErrorInfo(inputName, 'Bạn còn chưa đủ 10 tuổi cơ hic :<');
+            isError = true
+        } else if (age > 0) {
+            setErrorInfo(inputName, 'Bạn còn chưa đẻ cơ hic :<');
+            isError = true
+        }
+    } else if (inputName === 'password-check') {
+        if (value !== formData.get('password')) {
+            setErrorInfo(inputName, 'Mật khẩu không khớp!');
+            isError = true
+        }
+    }
+    return isError
+}
+
+
+async function submitForm(event) {
+    event.preventDefault()
+    const button = event.target.querySelector('button[type=submit')
+    const form = event.target
+    if (!form) return alert('System Error')
+    button.disabled = true;
+    const formData = new FormData(form)
+    let data = {}
+    let isError = false
+    for (var p of formData) {
+        let name = p[0];
+        let value = p[1];
+        if (checkValue(name, value, formData)) {
+            isError = true
+        }
+        data[name] = value
+    }
+    if (isError) {
+        button.disabled = false;
+        return false
+    }
+
+    //const res = await request('/server/HandleAccount.aspx?action=' + form.id, formData);
+
+    //console.log(res)
+
+    let xmlhttp = new XMLHttpRequest();
+    xmlhttp.onreadystatechange = function () {
+        if (this.readyState == 4) {
+            button.disabled = false;
+            if (this.status == 200) {
+                let rs
+                try {
+                    rs = JSON.parse(this.response)
+                    localStorage.setItem("tokenWebSach", rs.token)
+                    rs = JSON.stringify(rs.data)
+                } catch (err) {
+                    console.log(err)
+                    rs = this.response
+                    alert(rs)
+                }
+                sessionStorage.setItem('userInfo', rs)
+                alert('Login Success!')
+                window.location.href = '/view/HomePage.html'
+                form.reset()
+            } else {
+                let rs
+                try {
+                    rs = JSON.parse(this.response)
+                    alert(rs.msg)
+                } catch (err) {
+                    console.log(err)
+                    rs = this.response
+                    alert(rs)
+                }
+            }
+        }
+
+    };
+    xmlhttp.open("POST", '/server/HandleAccount.aspx?action=' + form.id , true);
+    xmlhttp.send(formData);
+
+    //const res = await fetch('/server/HandleAccount.aspx?action=' + form.id, {
+    //    method: 'POST',
+    //    body: formData,
+    //    headers: {
+    //        contentType: 'application/json'
+    //        }
+    //})
+    //if (res.status === 200) {
+    //    let rs
+    //    try {
+    //        rs = await res.json();
+    //        rs = rs.data
+    //    } catch (err) {
+    //        console.error(err)
+    //        rs = await res.text()
+    //    }
+    //    alert('Login Success')
+    //    window.location.href = '/view/HomePage.html'
+    //} else {
+    //    let rs
+    //    try {
+    //        rs = await res.json();
+    //        rs = rs.msg
+    //    } catch (err) {
+    //        console.error(err)
+    //        rs = await res.text()
+    //    }
+    //    alert(rs)
+    //}
+} 

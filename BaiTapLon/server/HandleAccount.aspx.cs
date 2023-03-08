@@ -23,8 +23,15 @@ namespace BaiTapLon.server
         protected void Page_Load(object sender, EventArgs e)
         {
             con.Open();
+
             Response.ContentType = "application/json";
-            String action = Request.QueryString["action"];
+
+            //HttpCookie cookies = Request.Cookies["Authorization"];
+            //string test = cookies.Value;
+
+            //string de = BasicAuth.decode(test);
+
+            string action = Request.QueryString["action"];
             switch (action) {
                 case "register":
                     Register(Request.Form);
@@ -33,6 +40,9 @@ namespace BaiTapLon.server
                     String userName = Request.Form["username"];
                     String password = Request.Form["password"];
                     Login(userName, password);
+                    break;
+                case "checkToken":
+                    ReLogin(Request.InputStream);
                     break;
                 default:
                     Response.StatusCode = 400;
@@ -44,13 +54,20 @@ namespace BaiTapLon.server
             con.Close();
         }
 
-        public void Login(string username, string password)
+        protected void ReLogin(Stream body)
         {
-            string errorMsg = "Login Failed!";
-            if (username != null && password != null)
+            string errorMsg = "Token expired!";
+            Encoding encoding = Request.ContentEncoding;
+            StreamReader readerStream = new StreamReader(body, encoding);
+            string token = readerStream.ReadToEnd();
+            Authorization auth = new Authorization(token);
+            string decode = auth.decode(token);
+            string[] values = decode.Split('-');
+            int check = DateTime.UtcNow.CompareTo(DateTime.Parse(values[1]));
+            if (DateTime.UtcNow.CompareTo(DateTime.Parse(values[1])) <= 0)
             {
-
-                SqlCommand cmd = new SqlCommand("select * from Auth where username='"+username+"'", con);
+                string username = values[0];
+                SqlCommand cmd = new SqlCommand("select * from newAuth where username='" + username + "'", con);
 
                 SqlDataReader reader = cmd.ExecuteReader();
 
@@ -58,8 +75,60 @@ namespace BaiTapLon.server
 
                 while (reader.Read())
                 {
-                    Auth auth = new Auth((int)reader["ID"], reader["username"].ToString(), reader["password"].ToString(), (int)reader["userID"]);
-                    if (auth.username == username && auth.checkPassword(password))
+                    userID = reader["userID"].ToString();
+                }
+
+                reader.Close();
+                
+                User userInfo = null;
+                if (userID != null)
+                {
+                    cmd = new SqlCommand("select * from newUsers where ID=" + userID, con);
+
+                    reader = cmd.ExecuteReader();
+
+                    while (reader.Read())
+                    {
+                        userInfo = new User((int)reader["ID"], reader["name"].ToString(), reader["email"].ToString(), reader["birthday"].ToString(), reader["sex"].ToString(), reader["phone"].ToString());
+                    }
+                }
+                else
+                {
+                    errorMsg = "User name not Found!";
+                }
+                
+                reader.Close();
+
+                if (userInfo != null)
+                {
+                    Response.Write("{\"data\":" + userInfo.converString() + "}");
+                    Response.End();
+                }
+
+            }
+            Response.StatusCode = 400;
+            Response.Write("{\"msg\":\"" + errorMsg + "\"}");
+            Response.End();
+        }
+
+        protected void Login(string username, string password)
+        {
+            string errorMsg = "Login Failed!";
+            if (username != null && password != null)
+            {
+
+                SqlCommand cmd = new SqlCommand("select * from newAuth where username='" + username + "'", con);
+
+                SqlDataReader reader = cmd.ExecuteReader();
+
+                string userID = null;
+
+                Authorization BasicAuth = new Authorization(password);
+
+                while (reader.Read())
+                {
+                    Auth auth = new Auth((int)reader["ID"], reader["username"].ToString(), reader["password"].ToString(), (int)reader["userID"], (DateTime)reader["createdAt"]);
+                    if (auth.username == username && auth.password == BasicAuth.textEncrypted)
                     {
                         userID = auth.userID.ToString();
                     }
@@ -70,19 +139,22 @@ namespace BaiTapLon.server
                 User userInfo = null;
                 if (userID != null)
                 {
-                    cmd = new SqlCommand("select * from Users where ID=" + userID, con);
+                    cmd = new SqlCommand("select * from newUsers where ID=" + userID, con);
 
                     reader = cmd.ExecuteReader();
 
                     while (reader.Read())
                     {
-                        userInfo = new User((int)reader["ID"], reader["name"].ToString(), reader["birthday"].ToString(), reader["sex"].ToString());
+                        userInfo = new User((int)reader["ID"], reader["name"].ToString(), reader["email"].ToString(), reader["birthday"].ToString(), reader["sex"].ToString(), reader["phone"].ToString());
                     }
 
                 }
                 if (userInfo != null)
                 {
-                    Response.Write("{\"data\":" + userInfo.converString() + "}");
+
+                    string token = BasicAuth.generateToken(username);
+                    
+                    Response.Write("{\"data\":" + userInfo.converString() + ", \"token\": \""+token+"\"}");
                     Response.End();
                 }
                 else
@@ -95,12 +167,13 @@ namespace BaiTapLon.server
             Response.End();
         }
 
-        public void Register (NameValueCollection formData)
+        protected void Register (NameValueCollection formData)
         {
             string username = formData["username"];
             string errorMsg = null;
 
-            SqlCommand cmd = new SqlCommand("select * from Auth where username='" + username + "'", con);
+
+            SqlCommand cmd = new SqlCommand("select * from newAuth where username='" + username + "'", con);
 
             SqlDataReader reader = cmd.ExecuteReader();
 
@@ -124,25 +197,28 @@ namespace BaiTapLon.server
 
             cmd.Cancel();
 
-            cmd = new SqlCommand("INSERT INTO Users (name,birthday,sex)" +
+            cmd = new SqlCommand("INSERT INTO newUsers (name,email,birthday,phone,sex)" +
                 " OUTPUT Inserted.ID " +
-                "VALUES ('" + formData["fullname"] + "','" + formData["birthday"] + "','" + formData["sex"] + "')", con);
+                "VALUES ('" + formData["fullname"] + "','" + username + "','" + formData["birthday"] + "','" + formData["phone"] + "','" + formData["sex"] + "')", con);
             int newUserId = (int)cmd.ExecuteScalar();
 
             cmd.Cancel();
 
-            Auth auth = new Auth(1, username, formData["password"],newUserId);
+            Authorization password = new Authorization(formData["password"]);
+            
 
-            SqlCommand cmd1 = new SqlCommand("INSERT INTO Auth (username,password,userID)" +
-                " OUTPUT Inserted.ID " +
-                "VALUES ('" + username + "','" + auth.password + "', " + newUserId + ")", con);
+            Auth auth = new Auth(1, username, password.textEncrypted, newUserId, DateTime.Now);
 
-            int newAccount = (int)cmd1.ExecuteScalar();
+            SqlCommand cmd1 = new SqlCommand("INSERT INTO newAuth (username,password,userID)" +
+                "VALUES ('" + username + "','" + password.textEncrypted + "', " + newUserId + ")", con);
 
-            User userInfo = new User(newUserId, formData["fullname"], formData["birthday"], formData["sex"]);
+            cmd1.ExecuteNonQuery();
 
+            User userInfo = new User(newUserId, formData["fullname"], username, formData["birthday"], formData["sex"], formData["phone"]);
 
-            Response.Write("{\"data\":" + userInfo.converString().ToString() + "}");
+            string token = password.generateToken(username);
+
+            Response.Write("{\"data\":" + userInfo.converString() + ", \"token\": \"" + token + "\"}");
             Response.End();
         }
     }
