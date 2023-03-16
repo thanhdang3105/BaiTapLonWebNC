@@ -86,14 +86,128 @@ function checkValue(inputName, value, formData) {
             setErrorInfo(inputName, 'Mật khẩu không khớp!');
             isError = true
         }
+    } else if (inputName === 'OTP') {
+        if (value.length < 6) {
+            setErrorInfo(inputName, 'Mã xác thực gồm 6 chữ số!');
+            isError = true
+        }
     }
     return isError
+}
+
+const formResetPWD = `<label for="username">Email</label>
+                    <div class="wrapper_input">
+                        <input name="username" type="email" title="Vui lòng nhập Tài khoản của bạn" placeholder="VD: NguyenVanA@gmail.com" required />
+                        <div class="error_info">
+                            !
+                            <span>Error</span>
+                        </div>
+                    </div>
+                    <label for="password">Password</label>
+                    <div class="wrapper_input">
+                        <input name="password" type="password" title="Vui lòng nhập mật khẩu của bạn" placeholder="Nhập mật khẩu" required />
+                        <div class="error_info">
+                            !
+                            <span>Error</span>
+                        </div>
+                    </div>
+                    <label for="password-check">Re-Password</label>
+                    <div class="wrapper_input">
+                        <input name="password-check" type="password" title="Vui lòng nhập lại mật khẩu của bạn" placeholder="Nhập lại mật khẩu" required />
+                        <div class="error_info">
+                            !
+                            <span>Error</span>
+                        </div>
+                    </div>
+                    <button type="submit">Đổi mật khẩu</button>`
+
+async function forgotPassword(event) {
+    const modal = document.getElementById('modal_account');
+    const currentModalHtml = modal.innerHTML
+    if (!modal.classList.contains("show")) {
+        modal.classList.add('show');
+    } else {
+        event.preventDefault();
+        const form = event.target
+        const button = form.querySelector('button[type=submit]')
+        const overlay = modal.querySelector('div.overlay')
+        if (!form) return alert('System Error')
+        button.disabled = true;
+        overlay.onclick = () => { }; 
+        const formData = new FormData(form)
+        let data = {}
+        let isError = false
+        for (var p of formData) {
+            let name = p[0];
+            let value = p[1];
+            if (checkValue(name, value, formData)) {
+                isError = true
+            }
+            data[name] = value
+        }
+        if (isError) {
+            button.disabled = false;
+            overlay.onclick = closeModal
+            return false
+        }
+
+        const res = await request('/server/HandleAccount.aspx?action=' + form.id, formData)
+        if (res.status === 200) {
+            console.log(res.data)
+            if (res.data === 'Password is reset Successfuly!') {
+                overlay.onclick = closeModal
+                alert(res.data)
+                overlay.click()
+            } else if (!formData.get("OTP")) {
+                const label = document.createElement("label", { for: "OTP", innerText: "Email" })
+                label.setAttribute("for", "OTP")
+                label.innerHTML = "OTP"
+                const wrapperInput = document.createElement("div")
+                wrapperInput.className = "wrapper_input"
+                wrapperInput.innerHTML = `<input name="OTP" type="text" title="Vui lòng nhập mã xác thực đuọc gửi tới mail của bạn" required />
+                        <div class="error_info">
+                            !
+                            <span>Error</span>
+                        </div>`
+                form.querySelector("input[name=username]").setAttribute("readonly", true)
+                form.insertBefore(label, button)
+                form.insertBefore(wrapperInput, button)
+            } else if (res.data === "OTP isCorrect!") {
+                form.innerHTML = formResetPWD
+                const username = form.querySelector("input[name=username]")
+                username.value = formData.get("username")
+                username.setAttribute("readonly",true)
+            }
+        } else if (res.status === 400) {
+            console.log(res.data)
+        }
+        button.disabled = false;
+        overlay.onclick = closeModal
+    }
+}
+
+function closeModal(event) {
+    const modal = event.target.parentElement
+    modal.classList.remove("show");
+    modal.innerHTML = `<div class="overlay" onclick="closeModal(event)"></div>
+                <form id="forgotPassword" name="forgot" method="post" onsubmit="forgotPassword(event)">
+                    <h1>Quên mật khẩu</h1>
+                    <label for="username">Email</label>
+                    <div class="wrapper_input">
+                        <input name="username" type="email" title="Vui lòng nhập Tài khoản của bạn" placeholder="VD: NguyenVanA@gmail.com" required />
+                        <div class="error_info">
+                            !
+                            <span>Error</span>
+                        </div>
+                    </div>
+                    <button type="submit">Gửi mã xác nhận</button>
+                </form>`
 }
 
 
 async function submitForm(event) {
     event.preventDefault()
-    const button = event.target.querySelector('button[type=submit')
+    const button = event.target.querySelector('button[type=submit]')
     const form = event.target
     if (!form) return alert('System Error')
     button.disabled = true;
@@ -128,7 +242,6 @@ async function submitForm(event) {
                     localStorage.setItem("tokenWebSach", rs.token)
                     rs = JSON.stringify(rs.data)
                 } catch (err) {
-                    console.log(err)
                     rs = this.response
                     alert(rs)
                 }
@@ -142,7 +255,6 @@ async function submitForm(event) {
                     rs = JSON.parse(this.response)
                     alert(rs.msg)
                 } catch (err) {
-                    console.log(err)
                     rs = this.response
                     alert(rs)
                 }
@@ -183,3 +295,43 @@ async function submitForm(event) {
     //    alert(rs)
     //}
 } 
+
+function request(url, body, method = "POST") {
+    return new Promise((resolve, reject) => {
+        let xmlhttp = new XMLHttpRequest();
+        xmlhttp.onreadystatechange = function () {
+            if (this.readyState == 4) {
+                let result = {
+                    status: this.status,
+                    statusText: this.statusText
+                }
+                if (this.status == 200) {
+                    let rs
+                    try {
+                        rs = JSON.parse(this.response)
+                        //localStorage.setItem("tokenWebSach", rs.token)
+                        //rs = JSON.stringify(rs.data)
+                        rs = rs.data
+                    } catch (err) {
+                        rs = this.response
+                    }
+                    result.data = rs
+                    resolve(result)
+                } else {
+                    let rs
+                    try {
+                        rs = JSON.parse(this.response)
+                        rs = rs.msg
+                    } catch (err) {
+                        rs = this.response
+                    }
+                    result.data = rs
+                    reject(result)
+                }
+            }
+
+        };
+        xmlhttp.open(method, url, true);
+        xmlhttp.send(body);
+    })
+}

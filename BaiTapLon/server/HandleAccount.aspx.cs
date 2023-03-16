@@ -9,11 +9,15 @@ using System.Data.SqlClient;
 using System.Data.SqlTypes;
 using System.IO;
 using System.Linq;
+using System.Net;
+using System.Net.Mail;
 using System.Text;
 using System.Web;
+using System.Web.Http.Controllers;
 using System.Web.UI;
 using System.Web.UI.WebControls;
 using System.Xml.Linq;
+using static System.Collections.Specialized.BitVector32;
 
 namespace BaiTapLon.server
 {
@@ -26,10 +30,8 @@ namespace BaiTapLon.server
 
             Response.ContentType = "application/json";
 
-            //HttpCookie cookies = Request.Cookies["Authorization"];
-            //string test = cookies.Value;
+            object test = ViewState["thanh@gmail.com"];
 
-            //string de = BasicAuth.decode(test);
 
             string action = Request.QueryString["action"];
             switch (action) {
@@ -43,6 +45,9 @@ namespace BaiTapLon.server
                     break;
                 case "checkToken":
                     ReLogin(Request.InputStream);
+                    break;
+                case "forgotPassword":
+                    sendEmail(Request);
                     break;
                 default:
                     Response.StatusCode = 400;
@@ -220,6 +225,71 @@ namespace BaiTapLon.server
 
             Response.Write("{\"data\":" + userInfo.converString() + ", \"token\": \"" + token + "\"}");
             Response.End();
+        }
+
+        protected void sendEmail(HttpRequest body)
+        {
+            string sendTo = body.Form["username"];
+            string password = body.Form["password"];
+            if (sendTo != null && body.Form["OTP"] == null && password == null)
+            {
+                string text = DateTime.Now.ToFileTimeUtc().ToString();
+                string otp = text.Substring(text.Length - 6, 6);
+
+                SmtpClient smtpClient = new SmtpClient("smtp.gmail.com", 587);
+
+                smtpClient.Credentials = new System.Net.NetworkCredential("myshopstore31@gmail.com", "jfdoifyqymizmzbj");
+                smtpClient.DeliveryMethod = SmtpDeliveryMethod.Network;
+                smtpClient.EnableSsl = true;
+
+                MailMessage mail = new MailMessage();
+
+                //Setting From , To and CC
+                mail.From = new MailAddress("myshopstore31@gmail.com", "MyWeb Site");
+                mail.To.Add(new MailAddress("thanhls1235ls12@gmail.com"));
+                mail.Subject = "Reset Password";
+                mail.Body = "<h1>Mã OTP của bạn là:</h1> \n" + otp +
+                    "\nCảm ơn bạn đá quan tâm đến chúng tôi";
+                //mail.CC.Add(new MailAddress("MyEmailID@gmail.com"));
+                try
+                {
+                    smtpClient.Send(mail);
+
+                    Session[sendTo] = otp;
+
+                    Response.Write("Semd OTP to Mail");
+                    Response.End();
+
+                }
+                catch (Exception ex)
+                {
+                    throw ex;
+                }
+            } else if (sendTo != null && body.Form["OTP"] != null && password == null)
+            {
+                string OTP = Session[sendTo]?.ToString();
+                if (OTP == body.Form["OTP"])
+                {
+                    Session.Remove(sendTo);
+                    Response.Write("OTP isCorrect!");
+                    Response.End();
+                }
+            } else if (sendTo != null && password != null && body.Form["password-check"] != null)
+            {
+                Authorization auth = new Authorization(password);
+                SqlCommand cmd = new SqlCommand("update newAuth set password = '"+auth.textEncrypted+"' where username='"+sendTo+"'",con);
+                try
+                {
+                    cmd.ExecuteNonQuery();
+                }catch(Exception ex)
+                {
+                    Response.Write(ex.Message);
+                    Response.End();
+                }
+                Response.Write("Password is reset Successfuly!");
+                Response.End();
+            }
+            
         }
     }
 }
