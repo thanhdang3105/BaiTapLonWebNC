@@ -60,14 +60,3 @@ button.btn_icon:hover{
     background-color: var(--hover-color);
     color: var(--background-color);
 }
-
-
-@media print {
-    .header_container{
-        display: none;
-    }
-}
-
-button > i{
-    pointer-events: none;
-}

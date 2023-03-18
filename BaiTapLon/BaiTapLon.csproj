@@ -83,16 +83,12 @@
     <Content Include="admin\quanly.aspx" />
     <Content Include="components\convertToHtml.js" />
     <Content Include="components\itemMenu.js" />
-    <Content Include="script\DetailPage.js" />
-    <Content Include="script\Header.js" />
     <Content Include="script\HomePage.js" />
     <Content Include="script\request.js" />
     <Content Include="script\UserAccount.js" />
     <Content Include="server\HandleAccount.aspx" />
     <Content Include="server\homePage.aspx" />
-    <Content Include="style\DetailPage.css" />
     <Content Include="style\GlobalStyles.css" />
-    <Content Include="style\Header.css" />
     <Content Include="style\HomePage.css" />
     <Content Include="style\UserAccount.css" />
     <Content Include="view\DetailPage.html" />

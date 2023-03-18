@@ -3,6 +3,193 @@
     height: 100%;
 }
 
+.header_container {
+    width: 100%;
+    height: calc(var(--header-height) + (var(--header-height) / 2));
+}
+.header {
+    position: fixed;
+    display: flex;
+    width: 100%;
+    height: var(--header-height);
+    top: 0;
+    left: 0;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 15%;
+    background-color: var(--background-color);
+    border-bottom: 1px solid var(--border-color);
+    z-index: 1;
+    gap: 5%;
+}
+
+.header_logo {
+    width: 25%;
+    height: 100%;
+    overflow: hidden;
+    cursor: pointer;
+}
+
+.header_logo img{
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    object-position: left;
+}
+
+.header_search{
+    width: 55%;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 10px
+}
+
+.wrapper_search{
+    width:100%;
+    height: 100%;
+    position: relative;
+}
+
+.wrapper_search > .menu_search {
+    position: absolute;
+    width: 100%;
+    min-height: 100%;
+    height: max-content;
+    max-height: 50vh;
+    overflow: auto;
+    border: 1px solid var(--border-color);
+    background-color: white;
+    z-index: 2;
+    box-shadow: 0 0 10px 0 var(--shadow-color);
+    padding: 10px;
+    margin: 0;
+    list-style: none;
+}
+
+.wrapper_search > .input_search:not(:focus) + .menu_search {
+    display: none;
+}
+
+.input_search {
+    width: 100%;
+    padding: 10px;
+    border: 2px solid var(--border-color);
+}
+
+.header_btn-search{
+    border: none;
+    background-color: var(--background-color);
+    cursor: pointer;
+    border-radius: 99px;
+    padding: 12px;
+    font-size: 16px;
+}
+
+.header_btn-search:hover{
+    background-color: var(--hover-color);
+    color: var(--background-color);
+}
+
+.header_account {
+    width: 20%;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+.wrapper_menu{
+    position: relative;
+}
+
+.wrapper_menu > .header_menuAccount,
+.wrapper_menu > .header_notification {
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: max-content;
+    min-width: 100px;
+    background-color: white;
+    list-style: none;
+    padding: 0;
+    border: 1px solid var(--border-color);
+    text-align: center;
+    z-index: 2;
+    display: none;
+}
+
+.wrapper_menu:hover > .header_menuAccount, .wrapper_menu:hover > .header_notification {
+    display: block;
+}
+
+.wrapper_menu > .header_menuAccount::after, .wrapper_menu > .header_notification::after {
+    position: absolute;
+    content: "";
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 50px;
+    height: 12px;
+    background-color: transparent;
+}
+
+.wrapper_menu > .header_menuAccount > .menu_item,
+.wrapper_menu > .header_notification > .menu_item{
+    padding: 10px;
+    cursor: pointer;
+}
+
+.menu_item + .menu_item{
+    border-top: 1px solid var(--border-color);
+}
+
+.menu_item:hover{
+    background-color: var(--hover-color);
+    color: white;
+}
+
+.menu_item:hover > a.text_link{
+    color: white;
+}
+
+.text_link{
+    text-decoration: none;
+    color: var(--text-color);
+}
+
+.text_link:hover{
+    color: var(--hover-color);
+}
+
+.sub_header {
+    position: fixed;
+    display: flex;
+    width: 100%;
+    min-width: 55%;
+    height: calc(var(--header-height) / 2);
+    top: var(--header-height);
+    left: 0;
+    align-items: center;
+    justify-content: center;
+    padding: 0 15%;
+    gap: 10px;
+    background-color: var(--background-color);
+    border-bottom: 1px solid var(--border-color);
+    box-shadow: 0 0 10px 0 var(--shadow-color);
+    overflow: auto;
+}
+
+.sub_header > .sub_header-item {
+    padding: 10px;
+}
+
+.sub_header > .sub_header-item:hover {
+    background-color: var(--hover-color);
+    color: white;
+}
+
 .container_body{
     width: 100%;
     height: 100%;
@@ -57,7 +244,6 @@
     flex-direction: column;
     align-items: center;
     gap: 5px;
-    padding: 5px 10px;
 }
 
 .content_list > .item_list > .item_info > .item_info-name {
@@ -85,27 +271,3 @@
     color: red;
 }
 
-@media screen and (max-width: 1200px) {
-    .box_content > .content_list {
-        grid-template-columns: repeat(4, 1fr);
-    }
-}
-
-@media screen and (max-width: 992px) {
-    .box_content > .content_list {
-        grid-template-columns: repeat(3, 1fr);
-    }
-}
-
-
-@media screen and (max-width: 768px) {
-    .container_body {
-        padding: 20px 5%;
-    }
-}
-
-@media screen and (max-width: 480px) {
-    .container_body {
-        padding: 20px;
-    }
-}
