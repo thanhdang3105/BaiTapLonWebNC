@@ -80,6 +80,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="admin\quanly.aspx" />
     <Content Include="components\convertToHtml.js" />
     <Content Include="components\itemMenu.js" />
     <Content Include="script\DetailPage.js" />
@@ -100,6 +101,13 @@
     <Content Include="Web.config" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="admin\quanly.aspx.cs">
+      <DependentUpon>quanly.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="admin\quanly.aspx.designer.cs">
+      <DependentUpon>quanly.aspx</DependentUpon>
+    </Compile>
     <Compile Include="class\Authoziration.cs" />
     <Compile Include="class\ClassSach.cs" />
     <Compile Include="class\GlobalClass.cs" />
