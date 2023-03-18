@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
 using System.Web;
 
@@ -17,6 +18,9 @@ namespace BaiTapLon.server
         private string encode(string value)
         {
             byte[] bytes = Encoding.UTF8.GetBytes(value);
+
+            //SHA256 sHA256 = SHA256.Create("Authen");
+            //bytes = sHA256.ComputeHash(bytes);
 
             string encoded = Convert.ToBase64String(bytes);
             return encoded;

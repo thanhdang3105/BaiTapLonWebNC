@@ -12,47 +12,36 @@
     gap: 10px;
 }
 
-.box_content{
-    width: 100%;
-    height: max-content;
-}
-
-.box_content > a.show_more{
-    display: block;
-    text-align: center;
-    margin: 20px 0;
-}
-
-.box_content > .title {
-    margin: 10px 0;
-}
-
-.box_content > .content_list{
+.content_list{
     list-style: none;
     width: 100%;
     display: grid;
     grid-template-columns: repeat(5, 1fr);
-    grid-auto-rows: 250px;
+    grid-auto-rows: auto;
+    align-items: center;
     gap: 20px;
 }
 
 .content_list > .item_list{
     width: 100%;
     height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
     overflow: hidden;
 }
 
 .content_list > .item_list > .item_img {
     display: block;
     width: 100%;
-    height: 65%;
-    object-fit: contain;
-    object-position: center;
+    max-height: 65%;
 }
 
 .content_list > .item_list > .item_info{
     width: 100%;
-    height: 35%;
+    flex: 1;
+    min-height: 35%;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -61,12 +50,18 @@
 }
 
 .content_list > .item_list > .item_info > .item_info-name {
+    max-height: 40px;
     font-size: 20px;
     font-weight: bold;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    line-height: 1;
+    overflow: hidden;
 }
 
 .content_list > .item_list > .item_info > .item_info-desc {
-    height: 40px;   
+    max-height: 40px;   
     display: -webkit-box;
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 2;
@@ -79,27 +74,28 @@
     width: 100%;
     align-items: center;
     justify-content: space-between;
+    margin-top: auto;
 }
 
 .item_info-rate > .info_rate-like > i{
     color: red;
 }
 
-@media screen and (max-width: 1200px) {
-    .box_content > .content_list {
+@media screen and (max-width: 1200px){
+    .content_list {
         grid-template-columns: repeat(4, 1fr);
     }
 }
 
 @media screen and (max-width: 992px) {
-    .box_content > .content_list {
+    .content_list {
         grid-template-columns: repeat(3, 1fr);
     }
 }
 
 
 @media screen and (max-width: 768px) {
-    .container_body {
+    .container_body{
         padding: 20px 5%;
     }
 }

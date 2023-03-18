@@ -1,20 +1,35 @@
 ﻿
-window.addEventListener("DOMContentLoaded", (e) => {
+window.addEventListener("DOMContentLoaded", () => {
     getData();
 })
 
 async function getData() {
-    const res = await request('/server/homePage.aspx',undefined,'GET');
-    console.log(res);
+    const title = document.querySelector('.detail_title');
+    const formData = new FormData();
+    title.innerText = query.category || 'Tất cả';
+    if (query.search) {
+        formData.set('search', query.search)
+        formData.set('limit', 20)
+        title.innerText = `Kết quả tìm kiếm của "${query.search}" : `;
+    } else if (query.category) {
+        formData.set('category', query.category);
+    } else {
+        formData.set('category', '');
+    }
+    const res = await request('/server/HomePage.aspx', formData);
+    const ul = document.querySelector('ul#Details');
     if (res.status === 200) {
-        const data = res.data;
-        if(!data) return
-        Object.keys(data).map(key => {
-            const ul = document.querySelector('ul#' + key.toUpperCase());
-            data[key].map(item => {
-                const li = document.createElement('li');
-                li.className = "item_list";
-                li.innerHTML = `<a href="/view/DetailPage.html" class="item_img">
+        const data = res.data.data;
+        const count = res.data.count;
+        const title = ul.previousElementSibling
+        title.innerHTML += " <span class='span_text'> (" + count +" đầu sách)</span>";
+        if (data.length <= 0) {
+            return ul.innerHTML = '<li class="item_list">No Data</li>'
+        }
+        data.map(item => {
+            const li = document.createElement('li');
+            li.className = "item_list";
+            li.innerHTML = `<a href="/view/DetailPage.html" class="item_img">
                             <img src="https://th.bing.com/th/id/R.02fb9d33fe6274db44d306962b180e8a?rik=%2bsNFNzVh3jxgCQ&riu=http%3a%2f%2fi.desi.vn%2fl%2f2016%2f03%2f34%2f1.png&ehk=paVdyF1tqTwthbQqPtE0gQORb5CLd%2b61NnkeGgCdgz4%3d&risl=&pid=ImgRaw&r=0" title="logo" alt="logo" />
                         </a>
                         <div class="item_info">
@@ -25,12 +40,11 @@ async function getData() {
                                 <span class="info_rate-view span_text">${item.view} <i class="fa fa-eye"></i></span>
                             </div>
                         </div>`
-                ul.appendChild(li)
-            })
-            if (data[key].length < 10) {
-                ul.parentElement.querySelector('a.show_more').style.display = 'none';
-            }
+            ul.appendChild(li)
         })
+    } else {
+        console.log(res);
+        ul.innerHTML = '<li class="item_list">No Data</li>'
     }
 }
 
