@@ -9,7 +9,7 @@ window.addEventListener("DOMContentLoaded", (e) => {
 })
 
 async function getData() {
-    const res = await request('/server/homePage.aspx');
+    const res = await request('/server/homePage.aspx',null, "GET");
     console.log(res);
     if (res.status === 200) {
         const data = res.data;

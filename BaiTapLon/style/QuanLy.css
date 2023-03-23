@@ -1,0 +1,45 @@
+﻿.wrapper_modal {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background-color: var(--shadow-color);
+    backdrop-filter: blur(5px);
+}
+
+    .wrapper_modal.show {
+        display: flex;
+    }
+
+    #form1{
+        width: 100%;
+        min-height: 100vh;
+        padding: 20px;
+    }
+
+    #form1 > .header{
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 10px 20px;
+    }
+
+        #form1 #tableSach{
+            width: 100%;
+            height: 100%;
+            margin: auto;
+            border: 1px solid black;
+        }
+
+            #form1 #tableSach td, #form1 #tableSach th{
+                text-align: center;
+                padding: 5px;
+            }
+
+        td > .btn{
+            width: 100%;
+        }

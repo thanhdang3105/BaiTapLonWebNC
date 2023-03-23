@@ -34,7 +34,7 @@ namespace BaiTapLon.server
             string data = "{\"id\":\"" + this.ID + "\", " +
                 "\"name\":\"" + this.name + "\"," +
                 "\"category\":\"" + this.category + "\"," +
-                "\"description\":\"" + this.description + "\"," +
+                "\"description\":\"" + this.description.Trim() + "\"," +
                 "\"imgSrc\":\"" + this.imgSrc + "\"," +
                 "\"like\":\"" + this.like + "\"," +
                 "\"view\":\"" + this.view + "\"}";
