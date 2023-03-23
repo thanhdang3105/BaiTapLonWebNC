@@ -90,11 +90,14 @@
     <Content Include="server\homePage.aspx" />
     <Content Include="style\GlobalStyles.css" />
     <Content Include="style\HomePage.css" />
+    <Content Include="style\ModalQuanLy.css" />
+    <Content Include="style\QuanLy.css" />
     <Content Include="style\UserAccount.css" />
     <Content Include="view\DetailPage.html" />
     <Content Include="view\HomePage.html" />
     <Content Include="view\UserAccount.html" />
     <Content Include="Web.config" />
+    <Content Include="components\WebUserControl1.ascx" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="admin\quanly.aspx.cs">
@@ -121,6 +124,13 @@
     </Compile>
     <Compile Include="server\homePage.aspx.designer.cs">
       <DependentUpon>homePage.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="components\WebUserControl1.ascx.cs">
+      <DependentUpon>WebUserControl1.ascx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="components\WebUserControl1.ascx.designer.cs">
+      <DependentUpon>WebUserControl1.ascx</DependentUpon>
     </Compile>
   </ItemGroup>
   <ItemGroup>

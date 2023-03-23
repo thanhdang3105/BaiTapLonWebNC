@@ -1,0 +1,82 @@
+﻿.modalForm {
+    display: flex;
+    flex-direction: column;
+    min-width: 700px;
+    width: fit-content;
+    height: fit-content;
+    background-color: white;
+    padding: 50px;
+    gap: 10px;
+}
+
+.modalForm > .header_modal {
+    display: flex;
+    justify-content: space-between;
+}
+
+.modalForm  i.icon_button {
+    width: fit-content;
+    width: 40px;
+    height: 40px;
+    line-height: 1;
+    border-radius: 99px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+    .modalForm  i.icon_button:hover {
+        background-color: var(--hover-color);
+        color: white;
+    }
+
+.modalForm label{
+    color: var(--span-color);
+}
+
+.modalForm .wrapper_input{
+    display: flex;
+    flex-direction: column;
+}
+
+    .modalForm .wrapper_input input{
+        padding: 10px;
+    }
+
+    .modalForm .wrapper_input > select {
+        padding: 5px;
+    }
+
+    .modalForm .wrapper_input > textarea {
+        padding: 5px;
+        min-height: 80px;
+    }
+
+    .modalForm .wrapper_input > .error_info {
+        display: flex;
+        align-items: center;
+        justify-content: flex-start;
+        gap: 5px;
+        margin-bottom: 10px;
+        color: red;
+        width: 0;
+        height: 0;
+        white-space: nowrap;    
+        opacity: 0;
+        transition: all 0.2s linear;
+        overflow: hidden;
+    }
+
+    .modalForm .wrapper_input.showError > .error_info {
+        opacity: 1;
+        width: 100%;
+        height: fit-content;
+    }
+
+.createItem{
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 5px;
+}

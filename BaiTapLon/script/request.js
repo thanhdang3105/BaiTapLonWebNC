@@ -1,5 +1,4 @@
-﻿
-function request(url,body,method="POST") {
+﻿function request(url, body, method = "POST") {
     return new Promise((resolve, reject) => {
         let xmlhttp = new XMLHttpRequest();
         xmlhttp.onreadystatechange = function () {
@@ -14,8 +13,8 @@ function request(url,body,method="POST") {
                         rs = JSON.parse(this.response)
                         //localStorage.setItem("tokenWebSach", rs.token)
                         //rs = JSON.stringify(rs.data)
+                        rs = rs.data
                     } catch (err) {
-                        console.log(err)
                         rs = this.response
                     }
                     result.data = rs
@@ -24,8 +23,8 @@ function request(url,body,method="POST") {
                     let rs
                     try {
                         rs = JSON.parse(this.response)
+                        rs = rs.msg
                     } catch (err) {
-                        console.log(err)
                         rs = this.response
                     }
                     result.data = rs
@@ -38,5 +37,3 @@ function request(url,body,method="POST") {
         xmlhttp.send(body);
     })
 }
-
-export default request
