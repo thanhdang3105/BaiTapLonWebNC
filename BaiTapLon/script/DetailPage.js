@@ -6,35 +6,57 @@ window.addEventListener("DOMContentLoaded", () => {
 async function getData() {
     const title = document.querySelector('.detail_title');
     const formData = new FormData();
-    title.innerText = query.category || 'Tất cả';
+    const select = document.getElementById('select_sort-detailPage');
+    if (select) {
+        select.value = query.sort || ""
+    }
+    formData.set('category', '');
     if (query.search) {
         formData.set('search', query.search)
         formData.set('limit', 20)
-        title.innerText = `Kết quả tìm kiếm của "${query.search}" : `;
     } else if (query.category) {
         formData.set('category', query.category);
-    } else {
-        formData.set('category', '');
     }
-    const res = await request('/server/HomePage.aspx', formData);
+
+    if (query.sort) {
+        formData.set('sort', query.sort)
+    }
+
+    if (query.page) {
+        let page = Number(query.page)
+        if (page > 0) {
+            formData.set('skip',page - 1)
+        }
+    } 
     const ul = document.querySelector('ul#Details');
+    loading(ul)
+    const res = await request('/server/DetailPage.aspx', formData);
+    title.innerText = query.category || 'Tất cả';
+    if (window.header?.category && query.category) {
+        title.innerText = header.category[query.category] || query.category || 'Tất cả';
+    }
+    if (query.search) {
+        title.innerText = `Kết quả tìm kiếm của "${query.search}" : `;
+    }
+    
     if (res.status === 200) {
+
         const data = res.data.data;
         const count = res.data.count;
-        const title = ul.previousElementSibling
-        title.innerHTML += " <span class='span_text'> (" + count +" đầu sách)</span>";
+        renderPagination(count, 20, query?.page)
+        title.innerHTML += " <span class='span_text'> (" + count + " đầu sách)</span>";
         if (data.length <= 0) {
-            return ul.innerHTML = '<li class="item_list">No Data</li>'
+            return ul.innerHTML = '<li class="item_list">Hiện chưa có sách nào!</li>'
         }
         data.map(item => {
             const li = document.createElement('li');
             li.className = "item_list";
             li.innerHTML = `<a href="/view/DetailPage.html" class="item_img">
-                            <img src="https://th.bing.com/th/id/R.02fb9d33fe6274db44d306962b180e8a?rik=%2bsNFNzVh3jxgCQ&riu=http%3a%2f%2fi.desi.vn%2fl%2f2016%2f03%2f34%2f1.png&ehk=paVdyF1tqTwthbQqPtE0gQORb5CLd%2b61NnkeGgCdgz4%3d&risl=&pid=ImgRaw&r=0" title="logo" alt="logo" />
-                        </a>
+                            <img src="${item.imgSrc}" onerror="handleImgError(event)" title="img-${item.name}" alt="img-${item.name}" />
+                       </a>
                         <div class="item_info">
                             <a href="/view/DetailPage.html" class="item_info-name text_link">${item.name}</a>
-                            <span class="item_info-desc">${item.description}</span>
+                            <span class="item_info-desc">${item.desc}</span>
                             <div class="item_info-rate">
                                 <span class="info_rate-like span_text">${item.like} <i class="fa fa-heart"></i></span>
                                 <span class="info_rate-view span_text">${item.view} <i class="fa fa-eye"></i></span>
@@ -46,6 +68,51 @@ async function getData() {
         console.log(res);
         ul.innerHTML = '<li class="item_list">No Data</li>'
     }
+    unLoading(ul)
+    
+}
+
+function handleChangeSelectDetailPage(e) {
+    handleSearchParams('sort',e.target.value)
+}
+
+function renderPagination(count, limit = 20, currentPage = 1) {
+    const wrapper = document.getElementById('detailPage_pagination')
+    if (!count) {
+        return
+    } else {
+        const length = Math.ceil(Number(count) / Number(limit))
+        for (let i = 1; i <= Number(length); i++) {
+            const pageItem = document.createElement('button')
+            pageItem.type = "button";
+            pageItem.className = "btn btn_ghost"
+            pageItem.onclick = () => {
+                paginationChangePage(i)
+            }
+            pageItem.innerText = i
+            if (i == currentPage) {
+                pageItem.disabled = true
+            } else {
+                pageItem.disabled = false
+            }
+            wrapper.appendChild(pageItem)
+        }
+    }
+}
+
+function paginationChangePage(page) {
+    if (page < 1) return
+    handleSearchParams('page',page)
+}
+
+function handleSearchParams(key,value) {
+    const paramsSearch = new URLSearchParams(window.location.search)
+    if (value) {
+        paramsSearch.set(key, value)
+    } else {
+        paramsSearch.delete(key)
+    }
+    window.location.search = paramsSearch.toString()
 }
 
 

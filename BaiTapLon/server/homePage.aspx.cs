@@ -17,110 +17,74 @@ namespace BaiTapLon.server
         SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["SqlDB"].ConnectionString);
         protected void Page_Load(object sender, EventArgs e)
         {
-            con.Open();
             Response.ContentType = "application/json";
-            string response = "{\"msg\": Request not Support! }";
-            int limit = Convert.ToInt32(Request.Form["limit"]);
-            int skip = Convert.ToInt32(Request.Form["skip"]);
-            if (limit <= 0)
+            string response = "{\"msg\": \"Request not Support!\" }";
+            try
             {
-                limit = 10;
-            }
-            if (Request.RequestType == "GET")
-            {
-                string NEW = getSachNEW();
-                string HOT = getSachHOT();
-                string VIEW = getSachViewest();
-                response = "{\"data\": { \"hot\": [" + HOT + "], \"new\": [" + NEW + "], \"view\": [" + VIEW + "] }}";
-            } else if (Request.RequestType == "POST" && Request.Form["search"] != null)
-            {
-                string[] dataSearch = SearchData(Request.Form["search"],limit,skip);
-                response = "{\"data\": { \"data\": [" + dataSearch[0] + "], \"count\": " + dataSearch[1] +" } }";
-            } else if (Request.RequestType == "POST" && Request.Form["category"] != null) { 
-                if(limit <= 0) {
-                    limit = 20;
+                con.Open();
+                if (Request.RequestType == "GET")
+                {
+                    string pathInfo = Request.PathInfo;
+                    if (pathInfo == "/getCate")
+                    {
+                        getCategory();
+                    }
+                    else
+                    {
+                        string NEW = getSachNEW();
+                        string HOT = getSachHOT();
+                        string VIEW = getSachViewest();
+                        response = "{\"data\": { \"hot\": [" + HOT + "], \"new\": [" + NEW + "], \"view\": [" + VIEW + "] }}";
+                    }
                 }
-                int count = CountData("category", Request.Form["category"]);
-                string dataWithCate = getSachWithCategory(Request.Form["category"], limit, skip);
-                response = "{\"data\": { \"data\": [" + dataWithCate + "], \"count\": " + count + " } }";
-            } else
+                else
+                {
+                    Response.StatusCode = 404;
+                }
+            } catch(Exception ex)
             {
-                Response.StatusCode = 404;
+                response = "{\"msg\": \""+ex.Message.ToString()+"\" }";
             }
             Response.Write(response);
+            con.Close();
             Response.End();
         }
 
-        protected int CountData(string column, string value)
+        protected void getCategory()
         {
-            string where = "where " + column + " like '%" + value + "%'";
-            if(column == null || value == null || value == "")
+            Response.ContentType = "application/json";
+            try
             {
-                where = "";
+                SqlCommand cmd = new SqlCommand("select * from tblCategory order by ID DESC", con);
+                SqlDataReader reader = cmd.ExecuteReader();
+
+                List<string> lists = new List<string>();
+
+                while (reader.Read())
+                {
+
+                    string category = "{\"key\": \"" + reader["name"] + "\", \"value\":\"" + reader["category"] + "\"}";
+                    lists.Add(category);
+
+                }
+
+                string[] data = new string[lists.Count];
+
+                for (int i = 0; i < data.Length; i++)
+                {
+                    if (lists[i] != null)
+                    {
+                        data[i] = lists[i];
+                    }
+                }
+                Response.Write("{\"data\": [" + String.Join(",", data) + "]}");
             }
-            SqlCommand cmd = new SqlCommand("select COUNT(ID) from tblSach "+where, con);
-            object reader = cmd.ExecuteScalar();
-
-            int count = (int)reader;
-
-            return count;
-        }
-
-        protected string[] SearchData(string search, int limit = 10, int skip = 0)
-        {
-            SqlCommand cmd = new SqlCommand("select * from tblSach WHERE name like '%"+search+ "%' OR category like '%"+search+"%' ORDER BY numberLike DESC OFFSET " + skip + " ROWS", con);
-            SqlDataReader reader = cmd.ExecuteReader();
-
-            List<ClassSach> lists = new List<ClassSach>();
-
-            while (reader.Read())
+            catch (Exception ex)
             {
-                ClassSach item = new ClassSach((int)reader["ID"], reader["name"].ToString(), reader["category"].ToString(), reader["description"].ToString(), reader["imgSrc"].ToString(), (int)reader["numberLike"], (int)reader["numberView"]);
-                lists.Add(item);
+                Response.StatusCode = 500;
+                Response.Write("{\"msg\":'" + ex.Message + "'}");
             }
-            string[] data = new string[lists.Count];
-
-            for (int i = 0; i < lists.Count; i++)
-            {
-                ClassSach item = lists[i];
-                data[i] = item.converString();
-            }
-
-            reader.Close();
-            cmd.Cancel();
-
-            return new string[2] { String.Join(",", data) , lists.Count.ToString() };
-        }
-
-        protected string getSachWithCategory(string category, int limit = 20, int skip = 0)
-        {
-            string where = "where category = '" + category + "'";
-            if(category == "") {
-                where = "";
-            }
-
-            SqlCommand cmd = new SqlCommand("select * from tblSach " + where + " ORDER BY ID DESC OFFSET " + skip + " ROWS FETCH NEXT " + limit + " ROWS ONLY", con);
-            SqlDataReader reader = cmd.ExecuteReader();
-
-            List<ClassSach> lists = new List<ClassSach>();
-
-            while (reader.Read())
-            {
-                ClassSach item = new ClassSach((int)reader["ID"], reader["name"].ToString(), reader["category"].ToString(), reader["description"].ToString(), reader["imgSrc"].ToString(), (int)reader["numberLike"], (int)reader["numberView"]);
-                lists.Add(item);
-            }
-            string[] data = new string[lists.Count];
-
-            for (int i = 0; i < lists.Count; i++)
-            {
-                ClassSach item = lists[i];
-                data[i] = item.converString();
-            }
-
-            reader.Close();
-            cmd.Cancel();
-
-            return String.Join(",", data);
+            Response.End();
         }
 
         protected string getSachHOT(int limit = 10, int skip = 0)

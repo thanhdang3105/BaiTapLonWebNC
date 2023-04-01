@@ -1,101 +1,234 @@
 ﻿<%@ Page Language="C#" AutoEventWireup="true" CodeBehind="quanly.aspx.cs" Inherits="BaiTapLon.admin.quanly" %>
 
-<%@ Register Src="~/components/WebUserControl1.ascx" TagPrefix="uc1" TagName="WebUserControl1" %>
+<%@ Register Src="~/components/modalForm.ascx" TagPrefix="uc1" TagName="WebUserControl1" %>
 
 
 <!DOCTYPE html>
 
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head runat="server">
-    <title></title>
+    <title>AdminPage</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.3.0/css/all.min.css" integrity="sha512-SzlrxWUlpfuzQ+pcUCosxcglQRNAq/DZjVsC0lE40xsADsfeQoEypE+enwcOiGjk/bSuGGKHEyjSoQ1zVisanQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link rel="stylesheet" href="../style/QuanLy.css" />
+    <script src="../script/handleImgError.js" type="text/javascript" defer></script>
+    <script src="../script/loading.js" type="text/javascript" defer></script>
 </head>
 <body>
-    <div class="wrapper_modal" onclick="event.target.classList.remove('show')">
+    <div class="wrapper_modal" onclick="onClose()">
         <uc1:WebUserControl1 runat="server" id="WebUserControl1"  />
     </div>
-    <form id="form1" runat="server">
+    <form id="form1" runat="server" onsubmit="event.preventDefault()">
         <div class="header">
-            <h1>Quản lý sách:</h1>
+            <h1>Quản lý sách: <span class="span_text">(<span id="quanly_header-count" class="span_text"></span> sách)</span></h1>
             <button type="button" class="btn" onclick="openModal()"><i class="fa fa-plus"></i>Create</button>
         </div>
         <table border="1" id="tableSach">
             <thead>
-                <tr>
-                    <td><button class="btn btn_ghost" type="button"><strong>ID</strong> <i class="fa fa-sort-desc"></i></button></td>
-                    <td><button class="btn btn_ghost" type="button"><strong>Name</strong> <i class="fa fa-plus"></i></button></td>
-                    <td><button class="btn btn_ghost" type="button"><strong>Category</strong> <i class="fa fa-plus"></i></button></td>
-                    <td><button class="btn btn_ghost" type="button"><strong>Description</strong> <i class="fa fa-plus"></i></button></td>
-                    <td><button class="btn btn_ghost" type="button"><strong>Image</strong> <i class="fa fa-plus"></i></button></td>
-                    <td><button class="btn btn_ghost" type="button"><strong>Like</strong> <i class="fa fa-plus"></i></button></td>
-                    <td><button class="btn btn_ghost" type="button"><strong>View</strong> <i class="fa fa-plus"></i></button></td>
+                <tr id="header_row">
+                    <td><button class="btn btn_ghost" type="button" onclick="sortBy(event,'ID',false)"><strong>ID</strong> <i class="fa fa-caret-down"></i></button></td>
+                    <td><strong>Name</strong></td>
+                    <td><strong>Category</strong></td>
+                    <td><strong>Description</strong></td>
+                    <td><strong>Image</strong></td>
+                    <td><button class="btn btn_ghost" type="button" onclick="sortBy(event,'numberLike',true)"><strong>Like</strong></button></td>
+                    <td><button class="btn btn_ghost" type="button" onclick="sortBy(event,'numberView',true)"><strong>View</strong></button></td>
+                    <td>Actions</td>
                 </tr>
             </thead>
             <tbody>
                 <tr>
-                    <td>1</td>
-                    <td>1</td>
-                    <td>1</td>
-                    <td>1</td>
-                    <td>1</td>
-                    <td>1</td>
-                    <td>1</td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
                 </tr>
             </tbody>
+            <tfoot>
+                <tr>
+                    <td colspan="3"><button type="button" class="btn" onclick="handleChangePage(-1)"><i class="fa fa-arrow-left"></i>Prev</button></td>
+                    <td colspan="2"><div>
+                        <input type="number" name="pagination_input-page" class="pagination_page" value="1" oninput="validationInputPage(event)" onkeypress="handlePressEnter(event,getDataPage)" onblur="getDataPage(event.target.value)" />
+                        of
+                        <span class="span_text" id="quanly_page-count"></span>
+                        </div></td>
+                    <td colspan="3"><button type="button" class="btn" onclick="handleChangePage(1)">Next<i class="fa fa-arrow-right"></i></button></td>
+                </tr>
+            </tfoot>
         </table>
-        <%--<asp:SqlDataSource ID="SqlDataSource1" runat="server" ConnectionString="<%$ ConnectionStrings:SqlDB %>" 
-            SelectCommand="SELECT [ID], [name], [category], [description], [imgSrc], [numberLike], [numberView] FROM [tblSach] ORDER BY [ID] DESC"></asp:SqlDataSource>
-        <asp:DataGrid ID="tableSach" runat="server" DataSourceID="SqlDataSource1" DataKeyNames="ID" AllowPaging="true" PageSize="15">
-            <Columns>
-                <asp:BoundColumn DataField="ID" HeaderText="ID" ReadOnly="True" SortExpression="ID" />
-                <asp:BoundColumn DataField="name" HeaderText="name" SortExpression="name" />
-                <asp:BoundColumn DataField="category" HeaderText="category" SortExpression="category" />
-                <asp:BoundColumn DataField="description" HeaderText="description" SortExpression="description" />
-                <asp:BoundColumn DataField="imgSrc" HeaderText="imgSrc" SortExpression="imgSrc" />
-                <asp:BoundColumn DataField="numberLike" HeaderText="Like" SortExpression="numberLike" />
-                <asp:BoundColumn DataField="numberView" HeaderText="View" SortExpression="numberView"  />
-            </Columns>
-        --%></asp:DataGrid>
-       <%-- <asp:GridView ID="tableSach" runat="server" AutoGenerateColumns="False" DataKeyNames="ID" DataSourceID="SqlDataSource1" AllowPaging="True" PageSize="15" AllowSorting="True" CellSpacing="2">
-            <Columns>
-                <asp:BoundField DataField="ID" HeaderText="ID" InsertVisible="False" ReadOnly="True" SortExpression="ID" />
-                <asp:BoundField DataField="name" HeaderText="name" SortExpression="name" />
-                <asp:BoundField DataField="category" HeaderText="category" SortExpression="category" />
-                <asp:BoundField DataField="description" HeaderText="description" SortExpression="description" />
-                <asp:BoundField DataField="imgSrc" HeaderText="imgSrc" SortExpression="imgSrc" />
-                <asp:BoundField DataField="numberLike" HeaderText="Like" SortExpression="numberLike" />
-                <asp:BoundField DataField="numberView" HeaderText="View" SortExpression="numberView"  />
-                <asp:ButtonField HeaderText="Actions" ButtonType="Button" Text="Xóa" ControlStyle-CssClass="btn" CommandName="buttin" />
-            </Columns>
-            <EmptyDataTemplate>
-                No Data
-            </EmptyDataTemplate>
-        </asp:GridView>--%>
     </form>
     <script>
+        
+        function handlePressEnter(event,action) {
+            if (event.code === 'Enter') {
+                action(event.target.value)
+            }
+        }
+
+        function validationInputPage(event) {
+            const value = event.target.value;
+            const pageCount = document.getElementById('quanly_page-count').innerText
+            if (pageCount && value && value > Number(pageCount)) {
+                event.target.value = pageCount
+            } else if (pageCount && value && value < 1) {
+                event.target.value = 1
+            }
+        }
+
+        function handleChangePage(sub) {
+            if (sub) {
+                const indexedPage = document.querySelector('input[name=pagination_input-page]')
+                const pageCount = document.getElementById('quanly_page-count')?.innerText
+                const newPage = Number(indexedPage?.value || '') + sub
+                if (newPage > Number(pageCount) || newPage < 1) {
+                    return
+                } else {
+                    getDataPage(newPage)
+                    indexedPage.value = newPage
+                }
+            }
+        }
+
+        async function getDataPage(page) {
+            if(!page) return
+            page = Number(page) - 1
+            let url = "/admin/quanly.aspx/getData?skip=" + page
+            if (window.quanly?.currentUrl && quanly.currentUrl.includes('?')) {
+                url = quanly.currentUrl + "&skip=" + page
+            }
+            const res = await request(url, null, 'GET')
+            if (res.status === 200) {
+                bindDataTable(res?.data || [])
+            }
+        }
+    
         function openModal() {
             const modal = document.querySelector('div.wrapper_modal')
             modal && modal.classList.add('show')
         }
 
-        async function getData() {
-            const res = await request('/admin/quanly.aspx/getData', null, 'GET')
-            let data = "";
-            res?.data?.map(item => {
-                data += `<tr>
+        async function sortBy(e, field, sort) {
+            const res = await request('/admin/quanly.aspx/getData?sort=' + field + " " + (sort ? "DESC" : "ASC"), null, 'GET')
+            window.quanly = {
+                currentUrl: '/admin/quanly.aspx/getData?sort=' + field + " " + (sort ? "DESC" : "ASC")
+            }
+            if (res.status === 200) {
+                bindDataTable(res?.data)
+                const button = e.target
+                button.onclick = (event) => {
+                    sortBy(event, field, !sort)
+                }
+                const listEnableSorts = document.querySelectorAll('#header_row button')
+
+                Array.from(listEnableSorts).map(btn => {
+                    const icon = btn.children[1]
+                    icon && btn.removeChild(icon);
+                })
+
+                const newicon = document.createElement('i');
+                newicon.className = 'fa fa-caret-down';
+                if (newicon) {
+                    if (!sort) {
+                        newicon.className = newicon.className.replace('down', 'up')
+                    }
+                }
+                button.appendChild(newicon)
+            }
+        }
+
+        function bindDataTable(data) {
+            let render = "";
+            data?.map(item => {
+                let JSONItem
+                try {
+                    JSONItem = JSON.stringify(item).replaceAll("\"", "'");
+                } catch (e) {
+                    JSONItem = item.toString()
+                }
+                render += `<tr id="row-${item.id}">
                     <td>${item.id}</td>
                     <td>${item.name}</td>
                     <td>${item.category}</td>
-                    <td>${item.description}</td>
-                    <td>${item.imgSrc}</td>
+                    <td>${item.desc}</td>
+                    <td><img class="preview_img" alt="preview-${item.name}" onerror="handleImgError(event)" title="img-${item.name}" src="${item.imgSrc}" /></td>
                     <td>${item.like}</td>
                     <td>${item.view}</td>
+                    <td class='action_column'><i class='fa fa-edit' onclick="updateItem(event,${JSONItem})"></i><i class='fa fa-trash' onclick="deleteItem(event,${JSONItem})"></i></td>
                 </tr>`
             })
-            document.querySelector('#tableSach tbody').innerHTML = data
+            document.querySelector('#tableSach tbody').innerHTML = render
         }
-        getData()
+
+        function bindFormValue(form, value) {
+
+            for (let input of (form.elements || [])) {
+                if (input.type === 'file' && typeof value[input?.name] !== 'object' && value[input?.name]) {
+                    window.formFormModal = {
+                        fileUpload: value[input?.name]
+                    }
+                    const parentInput = input.parentElement
+                    const preview = parentInput.querySelector('div.wrapper_upload');
+                    preview.innerHTML = `<label for="imgSrc" class="btn btn_upload" ><img src="${value[input?.name] || ''}" onerror="handleImgError(event)" alt="preview_img" /></label>
+                                        <i class="remove_preview fa fa-close" onclick="removePreview(event)"></i>`
+                } else {
+                    input.value = (value[input?.name || ''] || '')
+                }
+            }
+
+        }
+
+        function updateItem(e, item) {
+            const form = document.getElementById('formModal');
+            const parent = form.parentElement
+            bindFormValue(form,item)
+            form.target = 'update'
+            const title = form.querySelector('.header_modal h1')
+            const button = form.querySelector('button[type=submit]')
+            title.innerText = 'Cập nhật sách'
+            button.innerText = 'Cập nhật'
+            parent.classList.add('show')
+        }
+
+        function deleteItem(e, item) {
+            let form = document.getElementById('formModal');
+            const lists = Array.from(form.elements || [])
+            const buttonSubmit = form.querySelector('button[type=submit]')
+            lists.map(ele => {
+                if (ele.type !== 'file') {
+                    ele.value = item[ele?.name || ''] || 'action'
+                }
+            })
+            if (item.id) {
+                if (confirm('Bạn muốn xóa sách có id: ' + item.id + '?')) {
+                    form.target = 'delete'
+                    buttonSubmit.click();
+                }
+            }
+        }
+
+        async function getData() {
+            loading()
+            const res = await request('/admin/quanly.aspx/getData', null, 'GET')
+            window.quanlySach = res.data
+            if (res.status === 200) {
+                bindDataTable(res?.data)
+                if (res.count || res.count === 0) {
+                    document.getElementById('quanly_header-count').innerText = res.count
+                    document.getElementById('quanly_page-count').innerText = Math.ceil(res.count / 10)
+                }
+            } else if (res.status === 401) {
+                alert(res.data)
+                window.navigation.navigate('/view/UserAccount.html?redirect=true')
+            }
+            unLoading();
+        }
+
+        window.addEventListener("DOMContentLoaded", () => {
+            getData()
+        })
+
     </script>
 </body>
 </html>

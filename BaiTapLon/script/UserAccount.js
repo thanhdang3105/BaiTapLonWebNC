@@ -16,8 +16,8 @@ function toggleAction() {
     }
 }
 
-function setErrorInfo(inputName, errMsg = 'Error', isErr = true) {
-    const input = document.querySelector(`input[name=${inputName}]`)
+function setErrorInfo(inputName, errMsg = 'Error', isErr = true, form = '') {
+    const input = document.querySelector(`${form && '#' + form} input[name=${inputName}]`)
     if (input) {
         const wrapperInput = input.parentElement
         if (isErr) {
@@ -63,7 +63,7 @@ window.addEventListener("DOMContentLoaded", (e) => {
         for (let input of listInput) {
             input.oninput = (event) => {
                 if (event.target.value) {
-                    setErrorInfo(event.target.name, undefined, false)
+                    setErrorInfo(event.target.name, undefined, false, input.form.id)
                 }
             }
         }
@@ -123,7 +123,7 @@ const formResetPWD = `<label for="username">Email</label>
 
 async function forgotPassword(event) {
     const modal = document.getElementById('modal_account');
-    const currentModalHtml = modal.innerHTML
+    //const currentModalHtml = modal.innerHTML
     if (!modal.classList.contains("show")) {
         modal.classList.add('show');
     } else {
@@ -151,38 +151,44 @@ async function forgotPassword(event) {
             return false
         }
 
-        const res = await request('/server/HandleAccount.aspx?action=' + form.id, formData)
-        if (res.status === 200) {
-            console.log(res.data)
-            if (res.data === 'Password is reset Successfuly!') {
-                overlay.onclick = closeModal
-                alert(res.data)
-                overlay.click()
-            } else if (!formData.get("OTP")) {
-                const label = document.createElement("label", { for: "OTP", innerText: "Email" })
-                label.setAttribute("for", "OTP")
-                label.innerHTML = "OTP"
-                const wrapperInput = document.createElement("div")
-                wrapperInput.className = "wrapper_input"
-                wrapperInput.innerHTML = `<input name="OTP" type="text" title="Vui lòng nhập mã xác thực đuọc gửi tới mail của bạn" required />
+        try {
+            const res = await request('/server/HandleAccount.aspx?action=' + form.id, formData)
+            if (res.status === 200) {
+                console.log(res.data)
+                if (res.data === 'Password is reset Successfuly!') {
+                    overlay.onclick = closeModal
+                    alert(res.data)
+                    overlay.click()
+                } else if (!formData.get("OTP")) {
+                    const label = document.createElement("label", { for: "OTP", innerText: "Email" })
+                    label.setAttribute("for", "OTP")
+                    label.innerHTML = "OTP"
+                    const wrapperInput = document.createElement("div")
+                    wrapperInput.className = "wrapper_input"
+                    wrapperInput.innerHTML = `<input name="OTP" type="text" title="Vui lòng nhập mã xác thực đuọc gửi tới mail của bạn" required />
                         <div class="error_info">
                             !
                             <span>Error</span>
                         </div>`
-                form.querySelector("input[name=username]").setAttribute("readonly", true)
-                form.insertBefore(label, button)
-                form.insertBefore(wrapperInput, button)
-            } else if (res.data === "OTP isCorrect!") {
-                form.innerHTML = formResetPWD
-                const username = form.querySelector("input[name=username]")
-                username.value = formData.get("username")
-                username.setAttribute("readonly",true)
+                    form.querySelector("input[name=username]").setAttribute("readonly", true)
+                    form.insertBefore(label, button)
+                    form.insertBefore(wrapperInput, button)
+                } else if (res.data === "OTP isCorrect!") {
+                    form.innerHTML = formResetPWD
+                    const username = form.querySelector("input[name=username]")
+                    username.value = formData.get("username")
+                    username.setAttribute("readonly", true)
+                }
+            } else if (res.status === 400) {
+                setErrorInfo('username', res.data,true, form.id)
+            } else if (res.status === 500) {
+                alert(res.data)
             }
-        } else if (res.status === 400) {
-            console.log(res.data)
+            button.disabled = false;
+            overlay.onclick = closeModal
+        } catch (e) {
+            console.log(e)
         }
-        button.disabled = false;
-        overlay.onclick = closeModal
     }
 }
 
@@ -230,6 +236,7 @@ async function submitForm(event) {
     //const res = await request('/server/HandleAccount.aspx?action=' + form.id, formData);
 
     //console.log(res)
+    const params = new URLSearchParams(window.location.search)
 
     let xmlhttp = new XMLHttpRequest();
     xmlhttp.onreadystatechange = function () {
@@ -247,7 +254,11 @@ async function submitForm(event) {
                 }
                 sessionStorage.setItem('userInfo', rs)
                 alert('Login Success!')
-                window.location.href = '/view/HomePage.html'
+                if (params.get('redirect') === 'true') {
+                    window.history.back()
+                } else {
+                    window.location.href = '/view/HomePage.html'
+                }
                 form.reset()
             } else {
                 let rs
@@ -326,7 +337,7 @@ function request(url, body, method = "POST") {
                         rs = this.response
                     }
                     result.data = rs
-                    reject(result)
+                    resolve(result)
                 }
             }
 

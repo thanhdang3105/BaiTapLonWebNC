@@ -28,19 +28,19 @@
                 </div>
             </div>`
 
-window.addEventListener("DOMContentLoaded", () => {
-    const subHeader = createSubHeader();
+window.addEventListener("DOMContentLoaded", async () => {
+    const subHeader = await createSubHeader();
     
     const header = document.querySelector('header.header_container');
 
     header.innerHTML = headerHTML;
 
-    header.appendChild(subHeader);
+    subHeader && header.appendChild(subHeader);
 
     checkUserLogin();
 })
 
-function createSubHeader() {
+async function createSubHeader() {
     let search = new URLSearchParams(window.location.search)
     let query = {}
     if (search) {
@@ -52,17 +52,38 @@ function createSubHeader() {
         query = ''
     }
     window.query = query;
-
-    const subHeader = document.createElement('nav')
-    subHeader.className = 'sub_header'
-    subHeader.innerHTML = `<a href="/view/DetailPage.html" class="sub_header-item text_link ${query && !query.category && !query.search && 'active'}">Tất cả</a>
-                <a href="/view/DetailPage.html?category=hanh dong" class="sub_header-item text_link">Hành động</a>
-                <a href="/view/DetailPage.html?category=Drama" class="sub_header-item text_link">Tâm lí</a>
-                <a href="/view/DetailPage.html?category=Horror" class="sub_header-item text_link">Kịch tính</a>
-                <a href="/view/DetailPage.html?category=Romance" class="sub_header-item text_link">Tình yêu</a>
-                <a href="/view/DetailPage.html?category=Science" class="sub_header-item text_link">Viẽn tưởng</a>
-                <a href="/view/DetailPage.html?category=Cartoon" class="sub_header-item text_link">Trẻ em</a>`
-    return subHeader
+    window.header = {
+        category: {}
+    }
+    const res = await request('/server/homePage.aspx/getCate', null, "GET")
+    if (res.status === 200) {
+        const subHeader = document.createElement('nav')
+        subHeader.className = 'sub_header'
+        subHeader.innerHTML = ``
+        const list = [{ key: 'Tất cả', value: "" }, ...(res?.data || [])]
+        list.map(cate => {
+            let child = document.createElement('span')
+            if (query.category == cate?.value && !query.search) {
+                child.classList.add('active')
+            } else if (cate?.value === "") {
+                if (query && !query.category && !query.search) {
+                    child.classList.add('active')
+                } else {
+                    child = document.createElement('a')
+                    child.href = "/view/DetailPage.html"
+                }
+            } else {
+                child = document.createElement('a')
+                child.href = "/view/DetailPage.html?category=" + cate?.value
+            }
+            child.classList.add('sub_header-item','text_link')
+            child.innerText = cate?.key
+            subHeader.appendChild(child)
+            header.category[cate?.value] = cate?.key
+        })
+        return subHeader
+    }
+    return null
 }
 
 
@@ -164,7 +185,6 @@ const handleInputSearch = (event) => {
 }
 
 const handleClickSearch = (event) => {
-    console.log(event)
     if (event?.target) {
         const inputSearch = document.getElementsByName('header_input-search');
         if (inputSearch && inputSearch[0] && inputSearch[0].value) {
@@ -178,7 +198,7 @@ const handleSearch = async (value) => {
     list.innerHTML = '<i class="fa fa-spinner fa-spin"></i>';
     const formData = new FormData();
     formData.set("search", value);
-    const res = await request('/server/HomePage.aspx', formData);
+    const res = await request('/server/DetailPage.aspx', formData);
     if (res.status === 200) {
         const data = res.data.data
         const count = res.data.count
@@ -200,7 +220,7 @@ const handleSearch = async (value) => {
                     </div>
                     <div class="item_info">
                         <strong>${data[i].name}</strong>
-                        <span>${data[i].category}</span>
+                        <span>${header.category[data[i].category]}</span>
                     </div>
                 </li>
             `

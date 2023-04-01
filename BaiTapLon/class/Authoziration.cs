@@ -12,10 +12,21 @@ namespace BaiTapLon.server
         public string textEncrypted { get; set; }
         public Authorization(string text)
         {
-            this.textEncrypted = encode(text);
+            if (String.IsNullOrEmpty(text))
+            {
+                this.textEncrypted = "";
+            }
+            else
+            {
+                this.textEncrypted = encode(text);
+            }
         }
         private string encode(string value)
         {
+            if (String.IsNullOrEmpty(value))
+            {
+                return "";
+            }
             byte[] bytes = Encoding.UTF8.GetBytes(value);
 
             string encoded = Convert.ToBase64String(bytes);
@@ -23,6 +34,10 @@ namespace BaiTapLon.server
         }
         public string decode(string value)
         {
+            if(String.IsNullOrEmpty(value))
+            {
+                return "";
+            }
             try
             {
                 byte[] bytes = Convert.FromBase64String(value);
@@ -37,9 +52,9 @@ namespace BaiTapLon.server
             }
         }
 
-        public string generateToken(string text)
+        public string generateToken(string text, string role = "admin")
         {
-            string token = text + "-" + DateTime.UtcNow.AddDays(7).ToString();
+            string token = text + "-" + DateTime.UtcNow.AddDays(7).ToString() + "-" + role;
             string encryptToken = encode(token);
             return encryptToken;
         }

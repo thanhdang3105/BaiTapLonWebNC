@@ -12,12 +12,19 @@
     gap: 10px;
 }
 
-.content_list{
+.body_header{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.content_list {
     list-style: none;
     width: 100%;
+    min-height: 60vh;
     display: grid;
     grid-template-columns: repeat(5, 1fr);
-    grid-auto-rows: auto;
+    grid-auto-rows: 300px;
     align-items: center;
     gap: 20px;
 }
@@ -32,36 +39,40 @@
     overflow: hidden;
 }
 
-.content_list > .item_list > .item_img {
-    display: block;
-    width: 100%;
-    max-height: 65%;
-}
+    .content_list > .item_list > .item_img {
+        display: block;
+        width: 100%;
+        height: 60%;
+        object-fit: contain;
+        object-position: center;
+    }
 
 .content_list > .item_list > .item_info{
     width: 100%;
     flex: 1;
-    min-height: 35%;
+    min-height: 40%;
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 5px;
     padding: 5px 10px;
+    flex-shrink: 0;
 }
 
-.content_list > .item_list > .item_info > .item_info-name {
-    max-height: 40px;
-    font-size: 20px;
-    font-weight: bold;
-    display: -webkit-box;
-    -webkit-box-orient: vertical;
-    -webkit-line-clamp: 2;
-    line-height: 1;
-    overflow: hidden;
-}
+    .content_list > .item_list > .item_info > .item_info-name {
+        height: 40px;
+        font-size: 20px;
+        font-weight: bold;
+        display: -webkit-box;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 2;
+        line-height: 1;
+        overflow: hidden;
+        text-align: center;
+    }
 
 .content_list > .item_list > .item_info > .item_info-desc {
-    max-height: 40px;   
+    height: 40px;   
     display: -webkit-box;
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 2;
@@ -81,7 +92,16 @@
     color: red;
 }
 
-@media screen and (max-width: 1200px){
+.pagination{
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 10px;
+    padding: 10px;
+}
+
+@media screen and (max-width: 1200px) {
     .content_list {
         grid-template-columns: repeat(4, 1fr);
     }

@@ -43,6 +43,12 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Microsoft.Configuration.ConfigurationBuilders.Base, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.Configuration.ConfigurationBuilders.Base.2.0.0\lib\Net471\Microsoft.Configuration.ConfigurationBuilders.Base.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Configuration.ConfigurationBuilders.UserSecrets, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.Configuration.ConfigurationBuilders.UserSecrets.2.0.0\lib\Net471\Microsoft.Configuration.ConfigurationBuilders.UserSecrets.dll</HintPath>
+    </Reference>
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="Newtonsoft.Json, Version=12.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\packages\Newtonsoft.Json.12.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
@@ -83,12 +89,21 @@
     <Content Include="admin\quanly.aspx" />
     <Content Include="components\convertToHtml.js" />
     <Content Include="components\itemMenu.js" />
+    <Content Include="images\OIP.jpg" />
+    <Content Include="script\DetailPage.js" />
+    <Content Include="script\firebase.js" />
+    <Content Include="script\handleImgError.js" />
+    <Content Include="script\Header.js" />
     <Content Include="script\HomePage.js" />
+    <Content Include="script\loading.js" />
     <Content Include="script\request.js" />
     <Content Include="script\UserAccount.js" />
+    <Content Include="server\DetailPage.aspx" />
     <Content Include="server\HandleAccount.aspx" />
     <Content Include="server\homePage.aspx" />
+    <Content Include="style\DetailPage.css" />
     <Content Include="style\GlobalStyles.css" />
+    <Content Include="style\Header.css" />
     <Content Include="style\HomePage.css" />
     <Content Include="style\ModalQuanLy.css" />
     <Content Include="style\QuanLy.css" />
@@ -97,7 +112,7 @@
     <Content Include="view\HomePage.html" />
     <Content Include="view\UserAccount.html" />
     <Content Include="Web.config" />
-    <Content Include="components\WebUserControl1.ascx" />
+    <Content Include="components\modalForm.ascx" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="admin\quanly.aspx.cs">
@@ -111,6 +126,13 @@
     <Compile Include="class\ClassSach.cs" />
     <Compile Include="class\GlobalClass.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="server\DetailPage.aspx.cs">
+      <DependentUpon>DetailPage.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="server\DetailPage.aspx.designer.cs">
+      <DependentUpon>DetailPage.aspx</DependentUpon>
+    </Compile>
     <Compile Include="server\HandleAccount.aspx.cs">
       <DependentUpon>HandleAccount.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
@@ -125,12 +147,12 @@
     <Compile Include="server\homePage.aspx.designer.cs">
       <DependentUpon>homePage.aspx</DependentUpon>
     </Compile>
-    <Compile Include="components\WebUserControl1.ascx.cs">
-      <DependentUpon>WebUserControl1.ascx</DependentUpon>
+    <Compile Include="components\modalForm.ascx.cs">
+      <DependentUpon>modalForm.ascx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
-    <Compile Include="components\WebUserControl1.ascx.designer.cs">
-      <DependentUpon>WebUserControl1.ascx</DependentUpon>
+    <Compile Include="components\modalForm.ascx.designer.cs">
+      <DependentUpon>modalForm.ascx</DependentUpon>
     </Compile>
   </ItemGroup>
   <ItemGroup>

@@ -9,15 +9,18 @@
                 }
                 if (this.status == 200) {
                     let rs
+                    let count
                     try {
                         rs = JSON.parse(this.response)
                         //localStorage.setItem("tokenWebSach", rs.token)
                         //rs = JSON.stringify(rs.data)
+                        count = rs.count
                         rs = rs.data
                     } catch (err) {
                         rs = this.response
                     }
                     result.data = rs
+                    result.count = count
                     resolve(result)
                 } else {
                     let rs
@@ -34,6 +37,10 @@
 
         };
         xmlhttp.open(method, url, true);
+        const token = localStorage.getItem('tokenWebSach')
+        if (token) {
+            xmlhttp.setRequestHeader("Authorization",token)
+        }
         xmlhttp.send(body);
     })
 }

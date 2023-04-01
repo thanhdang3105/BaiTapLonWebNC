@@ -14,6 +14,7 @@ using System.Net.Mail;
 using System.Text;
 using System.Web;
 using System.Web.Http.Controllers;
+using System.Web.Services.Description;
 using System.Web.UI;
 using System.Web.UI.WebControls;
 using System.Xml.Linq;
@@ -26,35 +27,43 @@ namespace BaiTapLon.server
         SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["SqlDB"].ConnectionString);
         protected void Page_Load(object sender, EventArgs e)
         {
-            con.Open();
 
             Response.ContentType = "application/json";
 
-            object test = ViewState["thanh@gmail.com"];
-
-
-            string action = Request.QueryString["action"];
-            switch (action) {
-                case "register":
-                    Register(Request.Form);
-                    break;
-                case "login":
-                    String userName = Request.Form["username"];
-                    String password = Request.Form["password"];
-                    Login(userName, password);
-                    break;
-                case "checkToken":
-                    ReLogin(Request.InputStream);
-                    break;
-                case "forgotPassword":
-                    sendEmail(Request);
-                    break;
-                default:
-                    Response.StatusCode = 400;
-                    Response.Write("{\"msg\":\"Action not supported with route!\"}");
-                    Response.End();
-                    break;
+            try
+            {
+                con.Open();
+            }catch(Exception ex)
+            {
+                Response.Write("{\"msg\": \""+ex.Message.ToString()+"\" }");
+                Response.End();
             }
+                object test = ViewState["thanh@gmail.com"];
+
+
+                string action = Request.QueryString["action"];
+                switch (action)
+                {
+                    case "register":
+                        Register(Request.Form);
+                        break;
+                    case "login":
+                        String userName = Request.Form["username"];
+                        String password = Request.Form["password"];
+                        Login(userName, password);
+                        break;
+                    case "checkToken":
+                        ReLogin(Request.InputStream);
+                        break;
+                    case "forgotPassword":
+                        forgotPassword(Request);
+                        break;
+                    default:
+                        Response.StatusCode = 400;
+                        Response.Write("{\"msg\":\"Action not supported with route!\"}");
+                        Response.End();
+                        break;
+                }
 
             con.Close();
         }
@@ -68,7 +77,6 @@ namespace BaiTapLon.server
             Authorization auth = new Authorization(token);
             string decode = auth.decode(token);
             string[] values = decode.Split('-');
-            int check = DateTime.UtcNow.CompareTo(DateTime.Parse(values[1]));
             if (DateTime.UtcNow.CompareTo(DateTime.Parse(values[1])) <= 0)
             {
                 string username = values[0];
@@ -106,6 +114,7 @@ namespace BaiTapLon.server
 
                 if (userInfo != null)
                 {
+                    Session["Authorization"] = token;
                     Response.Write("{\"data\":" + userInfo.converString() + "}");
                     Response.End();
                 }
@@ -158,7 +167,7 @@ namespace BaiTapLon.server
                 {
 
                     string token = BasicAuth.generateToken(username);
-                    
+                    Session["Authorization"] = token;
                     Response.Write("{\"data\":" + userInfo.converString() + ", \"token\": \""+token+"\"}");
                     Response.End();
                 }
@@ -222,49 +231,39 @@ namespace BaiTapLon.server
             User userInfo = new User(newUserId, formData["fullname"], username, formData["birthday"], formData["sex"], formData["phone"]);
 
             string token = password.generateToken(username);
-
+            Session["Authorization"] = token;
             Response.Write("{\"data\":" + userInfo.converString() + ", \"token\": \"" + token + "\"}");
             Response.End();
         }
 
-        protected void sendEmail(HttpRequest body)
+        protected void forgotPassword(HttpRequest body)
         {
             string sendTo = body.Form["username"];
             string password = body.Form["password"];
             if (sendTo != null && body.Form["OTP"] == null && password == null)
             {
-                string text = DateTime.Now.ToFileTimeUtc().ToString();
-                string otp = text.Substring(text.Length - 6, 6);
+                SqlCommand cmd = new SqlCommand("select * from newAuth where username='" + sendTo + "'", con);
 
-                SmtpClient smtpClient = new SmtpClient("smtp.gmail.com", 587);
+                object scalar = cmd.ExecuteScalar();
 
-                smtpClient.Credentials = new System.Net.NetworkCredential("myshopstore31@gmail.com", "jfdoifyqymizmzbj");
-                smtpClient.DeliveryMethod = SmtpDeliveryMethod.Network;
-                smtpClient.EnableSsl = true;
-
-                MailMessage mail = new MailMessage();
-
-                //Setting From , To and CC
-                mail.From = new MailAddress("myshopstore31@gmail.com", "MyWeb Site");
-                mail.To.Add(new MailAddress("thanhls1235ls12@gmail.com"));
-                mail.Subject = "Reset Password";
-                mail.Body = "<h1>Mã OTP của bạn là:</h1> \n" + otp +
-                    "\nCảm ơn bạn đá quan tâm đến chúng tôi";
-                //mail.CC.Add(new MailAddress("MyEmailID@gmail.com"));
-                try
+                if(scalar != null)
                 {
-                    smtpClient.Send(mail);
-
-                    Session[sendTo] = otp;
-
-                    Response.Write("Semd OTP to Mail");
-                    Response.End();
-
+                    string message = sendEmail(sendTo);
+                    if (message == "Send OTP to Mail")
+                    {
+                        Response.Write("Semd OTP to Mail");
+                    }else
+                    {
+                        Response.StatusCode = 500;
+                        Response.Write(message);
+                    }
                 }
-                catch (Exception ex)
+                else
                 {
-                    throw ex;
+                    Response.StatusCode = 400;
+                    Response.Write("Email not found!");
                 }
+                Response.End();
             } else if (sendTo != null && body.Form["OTP"] != null && password == null)
             {
                 string OTP = Session[sendTo]?.ToString();
@@ -291,5 +290,42 @@ namespace BaiTapLon.server
             }
             
         }
+
+        protected string sendEmail(string sendTo)
+        {
+            string text = DateTime.Now.ToFileTimeUtc().ToString();
+            string otp = text.Substring(text.Length - 6, 6);
+
+            SmtpClient smtpClient = new SmtpClient("smtp.gmail.com", 587);
+
+            smtpClient.Credentials = new System.Net.NetworkCredential("myshopstore31@gmail.com", "jfdoifyqymizmzbj");
+            smtpClient.DeliveryMethod = SmtpDeliveryMethod.Network;
+            smtpClient.EnableSsl = true;
+
+            MailMessage mail = new MailMessage();
+
+            //Setting From , To and CC
+            mail.From = new MailAddress("myshopstore31@gmail.com", "MyWeb Site");
+            mail.To.Add(new MailAddress(sendTo));
+            mail.Subject = "Reset Password";
+            mail.Body = "<h1>Mã OTP của bạn là:</h1> \n" + otp +
+                "\nCảm ơn bạn đá quan tâm đến chúng tôi";
+            //mail.CC.Add(new MailAddress("MyEmailID@gmail.com"));
+            try
+            {
+                smtpClient.Send(mail);
+
+                Session[sendTo] = otp;
+
+
+                return "Semd OTP to Mail";
+
+            }
+            catch (Exception ex)
+            {
+                return ex.Message;
+            }
+        }
+
     }
 }

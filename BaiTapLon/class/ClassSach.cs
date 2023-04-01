@@ -31,10 +31,17 @@ namespace BaiTapLon.server
 
         public string converString()
         {
+
+            if(!this.description.StartsWith("\"") && !this.description.EndsWith("\""))
+            {
+                this.description = "\"" + this.description + "\"";
+            }
+
+
             string data = "{\"id\":\"" + this.ID + "\", " +
-                "\"name\":\"" + this.name + "\"," +
-                "\"category\":\"" + this.category + "\"," +
-                "\"description\":\"" + this.description.Trim() + "\"," +
+                "\"name\":\"" + this.name.Replace("\"","\\\"") + "\"," +
+                "\"category\":\"" + this.category.Replace("\"", "\\\"") + "\"," +
+                "\"desc\":" + this.description + "," +
                 "\"imgSrc\":\"" + this.imgSrc + "\"," +
                 "\"like\":\"" + this.like + "\"," +
                 "\"view\":\"" + this.view + "\"}";
