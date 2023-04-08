@@ -7,6 +7,7 @@ async function getData() {
     const title = document.querySelector('.detail_title');
     const formData = new FormData();
     const select = document.getElementById('select_sort-detailPage');
+    const listCate = JSON.parse(sessionStorage.getItem("category") || "{}")
     if (select) {
         select.value = query.sort || ""
     }
@@ -14,8 +15,10 @@ async function getData() {
     if (query.search) {
         formData.set('search', query.search)
         formData.set('limit', 20)
+        title.innerText = `Kết quả tìm kiếm của "${query.search}" : `;
     } else if (query.category) {
         formData.set('category', query.category);
+        title.innerText = listCate?.[query.category] || query.category || 'Tất cả';
     }
 
     if (query.sort) {
@@ -31,13 +34,6 @@ async function getData() {
     const ul = document.querySelector('ul#Details');
     loading(ul)
     const res = await request('/server/DetailPage.aspx', formData);
-    title.innerText = query.category || 'Tất cả';
-    if (window.header?.category && query.category) {
-        title.innerText = header.category[query.category] || query.category || 'Tất cả';
-    }
-    if (query.search) {
-        title.innerText = `Kết quả tìm kiếm của "${query.search}" : `;
-    }
     
     if (res.status === 200) {
 

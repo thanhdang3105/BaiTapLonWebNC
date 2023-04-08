@@ -1,0 +1,43 @@
+﻿
+
+form {
+    min-width: 350px;
+    min-height: 350px;
+    padding: 15px;
+    border: 1px solid var(--border-color);
+    box-shadow: 0 0 10px 0 var(--shadow-color);
+}
+
+form label {
+    font-size: 14px;
+    color: var(--span-color);
+}
+
+label.label_checkbox, label.label_radio {
+    color: var(--text-color);
+    margin: 0 5px;
+}
+
+form .input {
+    padding: 10px;
+    width: 100%;
+}
+
+.error_info {
+    opacity: 0;
+}
+
+.error_info.show {
+    opacity: 1;
+}
+
+.error_info.error{
+    color: red;
+}
+
+form .form_control{
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 10px;
+}

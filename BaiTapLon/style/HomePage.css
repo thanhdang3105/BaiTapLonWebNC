@@ -1,11 +1,11 @@
 ﻿.container{
     width: 100%;
-    height: 100%;
+    height: 100vh;
 }
 
 .container_body{
     width: 100%;
-    height: 100%;
+    min-height: 85vh;
     padding: 20px 15%;
     display: flex;
     flex-direction: column;
@@ -33,7 +33,7 @@
     display: grid;
     grid-template-columns: repeat(5, 1fr);
     grid-auto-rows: 300px;
-    gap: 20px;
+    gap: 15px;
 }
 
 .content_list > .item_list{
@@ -62,17 +62,18 @@
         flex-shrink: 0;
     }
 
-    .content_list > .item_list > .item_info > .item_info-name {
-        height: 40px;
-        font-size: 20px;
-        font-weight: bold;
-        display: -webkit-box;
-        -webkit-box-orient: vertical;
-        -webkit-line-clamp: 2;
-        line-height: 1;
-        overflow: hidden;
-        text-align: center;
-    }
+        .content_list > .item_list > .item_info > .item_info-name {
+            height: 42px;
+            font-size: 20px;
+            font-weight: bold;
+            display: -webkit-box;
+            -webkit-box-orient: vertical;
+            -webkit-line-clamp: 2;
+            white-space: normal;
+            line-height: 1.1;
+            overflow: hidden;
+            text-align: center;
+        }
 
 .content_list > .item_list > .item_info > .item_info-desc {
     height: 40px;   

@@ -4,6 +4,7 @@ window.addEventListener("DOMContentLoaded", (e) => {
 })
 
 async function getData() {
+    loading();
     const res = await request('/server/homePage.aspx',null, "GET");
     if (res.status === 200) {
         const data = res.data;
@@ -31,6 +32,7 @@ async function getData() {
             }
         })
     }
+    unLoading();
 }
 
 

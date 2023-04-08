@@ -6,9 +6,10 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.3.0/css/all.min.css" integrity="sha512-SzlrxWUlpfuzQ+pcUCosxcglQRNAq/DZjVsC0lE40xsADsfeQoEypE+enwcOiGjk/bSuGGKHEyjSoQ1zVisanQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link href="../style/GlobalStyles.css" rel="stylesheet" />
     <link href="../style/Header.css" rel="stylesheet" />
+    <link href="../style/DetailPage.css" rel="stylesheet" />
+    <link href="../style/Footer.css" rel="stylesheet" />
     <script src="../script/Header.js" defer></script>
     <script src="../script/loading.js" defer></script>
-    <link href="../style/DetailPage.css" rel="stylesheet" />
     <script src="../script/handleImgError.js" defer></script>
     <script src="../script/DetailPage.js" defer></script>
 </head>
@@ -21,8 +22,8 @@
                 <h2 class="detail_title">Tất cả</h2>
                 <select id="select_sort-detailPage" onchange="handleChangeSelectDetailPage(event)">
                     <option value="">Mới nhất</option>
-                    <option value="numberLike DESC">Được yêu thích nhất</option>
-                    <option value="numberView DESC">Được đọc nhiều nhất</option>
+                    <option value="like DESC">Được yêu thích nhất</option>
+                    <option value="view DESC">Được đọc nhiều nhất</option>
                 </select>
             </div>
             <ul id="Details" class="content_list">
@@ -30,6 +31,22 @@
             <div class="pagination" id="detailPage_pagination">
             </div>
         </div>
+        <footer class="footer_container">
+            <div class="footer_content">
+                <div class="logo_footer">
+                    <a href="HomePage.html">
+                        <img src="/images/logo.jpg" title="logo" alt="logo" />
+                    </a>
+                </div>
+                <div class="footer_content-box">
+                    <a class="text_link">Liên hệ bản quyền</a>
+                    <a class="text_link">Chính sách bảo mật</a>
+                </div>
+            </div>
+            <div class="footer_signal">
+                Design By Thanh Dang
+            </div>
+        </footer>
     </div>
 </body>
 </html>

@@ -1,0 +1,80 @@
+﻿.account_container {
+    width: 100%;
+    min-height: 100vh;
+    padding: 20px;
+}
+
+.account_container-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 20px;
+}
+
+.wrapper_modal{
+    display: none;
+    align-items: center;
+    justify-content: center;
+}
+
+table {
+    width: 100%;
+}
+
+table td, table th {
+    text-align: center;
+    padding: 5px;
+    max-width: 150px;
+    max-height: 150px;
+    word-break: break-word;
+    position: relative;
+}
+
+td > .btn {
+    width: 100%;
+}
+
+td.action_column i {
+    cursor: pointer;
+}
+
+
+.pagination_page {
+    width: 50px;
+}
+
+.menu_action {
+    display: none;
+}
+
+.menu_action.show{
+    position: absolute;
+    display: flex;
+    width: max-content;
+    padding: 5px;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: flex-start;
+    list-style: none;
+    gap: 5px;
+    top: 75%;
+    right: 0;
+    background-color: white;
+    border: 1px solid var(--border-color);
+    box-shadow: 0 0 10px 0 var(--shadow-color);
+    z-index: 66;
+}
+
+.item_menu{
+    display: flex;
+    width: 100%;
+    padding: 5px;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 5px;
+}
+
+.item_menu:hover{
+    background-color: var(--hover-color);
+    cursor: pointer;
+}

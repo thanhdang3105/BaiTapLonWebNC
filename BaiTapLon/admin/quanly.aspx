@@ -19,7 +19,7 @@
     </div>
     <form id="form1" runat="server" onsubmit="event.preventDefault()">
         <div class="header">
-            <h1>Quản lý sách: <span class="span_text">(<span id="quanly_header-count" class="span_text"></span> sách)</span></h1>
+            <h1><a href="/view/HomePage.html" class="text_link"><i class="fa fa-home"></i></a> Quản lý sách: <span class="span_text">(<span id="quanly_header-count" class="span_text"></span> sách)</span></h1>
             <button type="button" class="btn" onclick="openModal()"><i class="fa fa-plus"></i>Create</button>
         </div>
         <table border="1" id="tableSach">
@@ -30,9 +30,9 @@
                     <td><strong>Category</strong></td>
                     <td><strong>Description</strong></td>
                     <td><strong>Image</strong></td>
-                    <td><button class="btn btn_ghost" type="button" onclick="sortBy(event,'numberLike',true)"><strong>Like</strong></button></td>
-                    <td><button class="btn btn_ghost" type="button" onclick="sortBy(event,'numberView',true)"><strong>View</strong></button></td>
-                    <td>Actions</td>
+                    <td><button class="btn btn_ghost" type="button" onclick="sortBy(event,'like',true)"><strong>Like</strong></button></td>
+                    <td><button class="btn btn_ghost" type="button" onclick="sortBy(event,'view',true)"><strong>View</strong></button></td>
+                    <td><strong>Actions</strong></td>
                 </tr>
             </thead>
             <tbody>
@@ -105,8 +105,13 @@
         }
     
         function openModal() {
-            const modal = document.querySelector('div.wrapper_modal')
-            modal && modal.classList.add('show')
+            let form = document.getElementById('formModal');
+            const modal = form?.parentElement
+            if (modal) {
+                modal.classList.add('show')
+                form.target = 'create'
+                
+            }
         }
 
         async function sortBy(e, field, sort) {
@@ -216,11 +221,8 @@
                 bindDataTable(res?.data)
                 if (res.count || res.count === 0) {
                     document.getElementById('quanly_header-count').innerText = res.count
-                    document.getElementById('quanly_page-count').innerText = Math.ceil(res.count / 10)
+                    document.getElementById('quanly_page-count').innerText = Math.ceil(res.count / 10) || 1
                 }
-            } else if (res.status === 401) {
-                alert(res.data)
-                window.navigation.navigate('/view/UserAccount.html?redirect=true')
             }
             unLoading();
         }

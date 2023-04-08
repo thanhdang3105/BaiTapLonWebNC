@@ -8,11 +8,11 @@ namespace BaiTapLon.server
 
     public class ClassSach
     {
-        public int ID { get; set; }
+        public int id { get; set; }
         public string name { get; set; }
         
         public string category { get; set; }
-        public string description { get; set; }
+        public string desc { get; set; }
         public string imgSrc { get; set; }
         public int like { get; set; }
 
@@ -20,10 +20,10 @@ namespace BaiTapLon.server
 
         public ClassSach(int id, string Name, string Category, string desc, string src, int LIKE, int View)
         {
-            this.ID = id;
+            this.id = id;
             this.name = Name;
             this.category = Category;
-            this.description = desc;
+            this.desc = desc;
             this.imgSrc = src;
             this.like = LIKE;
             this.view = View;
@@ -32,20 +32,31 @@ namespace BaiTapLon.server
         public string converString()
         {
 
-            if(!this.description.StartsWith("\"") && !this.description.EndsWith("\""))
+            if(!this.desc.StartsWith("\"") && !this.desc.EndsWith("\""))
             {
-                this.description = "\"" + this.description + "\"";
+                this.desc = "\"" + this.desc + "\"";
             }
 
 
-            string data = "{\"id\":\"" + this.ID + "\", " +
+            string data = "{\"id\":\"" + this.id + "\", " +
                 "\"name\":\"" + this.name.Replace("\"","\\\"") + "\"," +
                 "\"category\":\"" + this.category.Replace("\"", "\\\"") + "\"," +
-                "\"desc\":" + this.description + "," +
+                "\"desc\":" + this.desc + "," +
                 "\"imgSrc\":\"" + this.imgSrc + "\"," +
                 "\"like\":\"" + this.like + "\"," +
                 "\"view\":\"" + this.view + "\"}";
             return data.ToString();
+        }
+    }
+
+    class CategoryClass
+    {
+        public string key { get; set; }
+        public string value { get; set; }
+        public CategoryClass(string key, string value)
+        {
+            this.key = key;
+            this.value = value;
         }
     }
 }

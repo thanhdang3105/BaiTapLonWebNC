@@ -1,7 +1,7 @@
 ﻿const headerHTML = `<div class="header">
                 <div class="header_logo">
                     <a href="HomePage.html">
-                        <img src="https://th.bing.com/th/id/R.02fb9d33fe6274db44d306962b180e8a?rik=%2bsNFNzVh3jxgCQ&riu=http%3a%2f%2fi.desi.vn%2fl%2f2016%2f03%2f34%2f1.png&ehk=paVdyF1tqTwthbQqPtE0gQORb5CLd%2b61NnkeGgCdgz4%3d&risl=&pid=ImgRaw&r=0" title="logo" alt="logo" />
+                        <img src="/images/logo.jpg" title="logo" alt="logo" />
                     </a>
                 </div>
                 <div class="header_search">
@@ -29,11 +29,11 @@
             </div>`
 
 window.addEventListener("DOMContentLoaded", async () => {
-    const subHeader = await createSubHeader();
-    
     const header = document.querySelector('header.header_container');
 
     header.innerHTML = headerHTML;
+
+    const subHeader = await createSubHeader();
 
     subHeader && header.appendChild(subHeader);
 
@@ -81,6 +81,7 @@ async function createSubHeader() {
             subHeader.appendChild(child)
             header.category[cate?.value] = cate?.key
         })
+        sessionStorage.setItem("category", JSON.stringify(header.category || {}))
         return subHeader
     }
     return null
@@ -108,7 +109,7 @@ async function checkUserLogin() {
         userInfo = JSON.parse(userInfo)
         iconUser.classList.remove("fa-regular");
         iconUser.classList.add("fa");
-        el = `${itemMenu({ href: "/view/UserAccount.html", label: userInfo.name })}
+        el = `${itemMenu({ href: "/view/UserInfo.html", label: userInfo.name })}
                       ${itemMenu({ label: "Đăng xuất", onClick: logout })}`
     } else {
         const token = localStorage.getItem("tokenWebSach");

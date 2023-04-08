@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Data.SqlClient;
@@ -13,6 +14,7 @@ namespace BaiTapLon.server
     public partial class DetailPage : System.Web.UI.Page
     {
         SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["SqlDB"].ConnectionString);
+        StoredProcedure procedure;
         protected void Page_Load(object sender, EventArgs e)
         {
             Response.ContentType = "application/json";
@@ -20,6 +22,7 @@ namespace BaiTapLon.server
             try
             {
                 con.Open();
+                procedure = new StoredProcedure(con);
                 string category = Request.Form["category"];
                 string sort = Request.Form["sort"];
                 int limit = Convert.ToInt32(Request.Form["limit"]);
@@ -31,7 +34,7 @@ namespace BaiTapLon.server
                         limit = 10;
                     }
                     string[] dataSearch = SearchData(Request.Form["search"], limit, skip, sort);
-                    response = "{\"data\": { \"data\": [" + dataSearch[0] + "], \"count\": " + dataSearch[1] + " } }";
+                    response = "{\"data\": { \"data\": " + dataSearch[0] + ", \"count\": " + dataSearch[1] + " } }";
                 }
                 else if (Request.RequestType == "POST" && category != null)
                 {
@@ -42,7 +45,7 @@ namespace BaiTapLon.server
 
                     int count = CountData("category", category);
                     string dataWithCate = getSachWithCategory(category, limit, skip, sort);
-                    response = "{\"data\": { \"data\": [" + dataWithCate + "], \"count\": " + count + " } }";
+                    response = "{\"data\": { \"data\": " + dataWithCate + ", \"count\": " + count + " } }";
                 }
                 else
                 {
@@ -60,15 +63,18 @@ namespace BaiTapLon.server
 
         protected int CountData(string column, string value)
         {
-            string where = "where " + column + " like '%" + value + "%'";
+            string where = column + " like '%" + value + "%'";
             if (column == null || value == null || value == "")
             {
                 where = "";
             }
-            SqlCommand cmd = new SqlCommand("select COUNT(ID) from tblSach " + where, con);
+            SqlCommand cmd = procedure.countBooksWithFilter(where);
+
             object reader = cmd.ExecuteScalar();
 
             int count = (int)reader;
+
+            cmd.Cancel();
 
             return count;
         }
@@ -82,33 +88,36 @@ namespace BaiTapLon.server
                 order = sort;
             }
 
-            SqlCommand cmd = new SqlCommand("select * from tblSach WHERE name like '%" + search + "%' OR category like '%" + search + "%' ORDER BY "+ order +" OFFSET " + skip + " ROWS", con);
+            string filter = "name like N'%" + search + "%' OR category like N'%" + search + "%'";
+
+            SqlCommand cmd = procedure.selectBooksWithFilter(filter, order,limit,skip);
+
             SqlDataReader reader = cmd.ExecuteReader();
 
             List<ClassSach> lists = new List<ClassSach>();
 
             while (reader.Read())
             {
-                ClassSach item = new ClassSach((int)reader["ID"], reader["name"].ToString(), reader["category"].ToString(), reader["description"].ToString(), reader["imgSrc"].ToString(), (int)reader["numberLike"], (int)reader["numberView"]);
+                ClassSach item = new ClassSach((int)reader["ID"], reader["name"].ToString(), reader["category"].ToString(), reader["description"].ToString(), reader["imgSrc"].ToString(), (int)reader["like"], (int)reader["view"]);
                 lists.Add(item);
             }
-            string[] data = new string[lists.Count];
 
-            for (int i = 0; i < lists.Count; i++)
-            {
-                ClassSach item = lists[i];
-                data[i] = item.converString();
-            }
+            string data = JsonConvert.SerializeObject(lists);
 
-            reader.Close();
             cmd.Cancel();
 
-            return new string[2] { String.Join(",", data), lists.Count.ToString() };
+            reader.Close();
+
+            cmd = procedure.countBooksWithFilter(filter);
+
+            object count = cmd.ExecuteScalar();
+
+            return new string[2] { data, count.ToString() };
         }
 
         protected string getSachWithCategory(string category, int limit = 20, int skip = 0, string sort = null)
         {
-            string where = "where category = '" + category + "'";
+            string where = "category = '" + category + "'";
             string order = "ID DESC";
             if (category == "")
             {
@@ -119,28 +128,24 @@ namespace BaiTapLon.server
                 order = sort;
             }
 
-            SqlCommand cmd = new SqlCommand("select * from tblSach " + where + " ORDER BY "+ order + " OFFSET " + (skip * limit) + " ROWS FETCH NEXT " + limit + " ROWS ONLY", con);
+            SqlCommand cmd = procedure.selectBooksWithFilter(where, sort, limit, skip);
+
             SqlDataReader reader = cmd.ExecuteReader();
 
             List<ClassSach> lists = new List<ClassSach>();
 
             while (reader.Read())
             {
-                ClassSach item = new ClassSach((int)reader["ID"], reader["name"].ToString(), reader["category"].ToString(), reader["description"].ToString(), reader["imgSrc"].ToString(), (int)reader["numberLike"], (int)reader["numberView"]);
+                ClassSach item = new ClassSach((int)reader["ID"], reader["name"].ToString(), reader["category"].ToString(), reader["description"].ToString(), reader["imgSrc"].ToString(), (int)reader["like"], (int)reader["view"]);
                 lists.Add(item);
             }
-            string[] data = new string[lists.Count];
 
-            for (int i = 0; i < lists.Count; i++)
-            {
-                ClassSach item = lists[i];
-                data[i] = item.converString();
-            }
+            string data = JsonConvert.SerializeObject(lists);
 
             reader.Close();
             cmd.Cancel();
 
-            return String.Join(",", data);
+            return data;
         }
     }
 }

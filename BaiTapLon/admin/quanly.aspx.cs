@@ -1,4 +1,5 @@
 ﻿using BaiTapLon.server;
+using Newtonsoft.Json;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -6,8 +7,12 @@ using System.Collections.Specialized;
 using System.Configuration;
 using System.Data.SqlClient;
 using System.Linq;
+using System.Net.Mail;
+using System.Net.Sockets;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Web;
+using System.Web.Services.Description;
 using System.Web.UI;
 using System.Web.UI.WebControls;
 using System.Xml.Linq;
@@ -17,19 +22,37 @@ namespace BaiTapLon.admin
     public partial class quanly : System.Web.UI.Page
     {
         SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["SqlDB"].ConnectionString);
+        StoredProcedure procedure;
+        ErrorResponse errMsg;
         protected void Page_Load(object sender, EventArgs e)
         {
-            con.Open();
-
+            try
+            {
+                con.Open();
+                procedure = new StoredProcedure(con);
+            }catch (Exception ex)
+            {
+                Response.StatusCode = 500;
+                Response.Write(ex.Message);
+                Response.End();
+            }
             if (Request.HttpMethod == "GET")
             {
                 string pathInfo = Request.PathInfo;
-                if(pathInfo == "/getData")
-                {
+                string sort = Request.QueryString["sort"];
+                int limit = Convert.ToInt32(Request.QueryString["limit"]);
+                int skip = Convert.ToInt32(Request.QueryString["skip"]);
+
+                if (!String.IsNullOrEmpty(pathInfo)) { 
                     CheckPermission();
-                    string sort = Request.QueryString["sort"];
-                    int skip = Convert.ToInt32(Request.QueryString["skip"]);
-                    getData(null,sort,10,skip);
+                }
+
+                if (pathInfo == "/getData")
+                {
+                    getData(null,sort, limit, skip);
+                }else if (pathInfo == "/getAccounts")
+                {
+                    getAccounts(null, sort, limit, skip);
                 }
             }
             else
@@ -49,9 +72,22 @@ namespace BaiTapLon.admin
                     case "delete":
                         deleteSach(Request.Form);
                         break;
+                    case "resetPassword":
+                        resetPassword(Request.Form);
+                        break;
+                    case "lockAccount":
+                        lockOrUnlockAccount(Request.Form,true);
+                        break;
+                    case "unlockAccount":
+                        lockOrUnlockAccount(Request.Form, false);
+                        break;
+                    case "changeRoleAccount":
+                        changeRoleAccount(Request.Form);
+                        break;
                     default:
                         Response.ContentType = "application/json";
-                        Response.Write("{\"msg\": \"Request not Support!\" }");
+                        errMsg = new ErrorResponse("Request not Support!");
+                        Response.Write(JsonConvert.SerializeObject(errMsg));
                         Response.End();
                         break;
                 }
@@ -79,11 +115,52 @@ namespace BaiTapLon.admin
             else
             {
                 string[] userInfo = tokenInfo.Split('-');
-                if (userInfo[2] != "admin" || DateTime.UtcNow.CompareTo(DateTime.Parse(userInfo[1])) >= 0)
+                string username = userInfo[0];
+                string expriedAt = userInfo[1];
+                string password = userInfo[2];
+                if (String.IsNullOrEmpty(username) || String.IsNullOrEmpty(password) || DateTime.UtcNow.CompareTo(DateTime.Parse(expriedAt)) >= 0)
                 {
                     Response.StatusCode = 401;
-                    Response.Write("No Permission!");
+                    Response.Write("Token is wrong or Token Expired!\n\nPlease Login again.");
                     Response.End();
+                }
+                else
+                {
+                    SqlCommand cmd = procedure.selectAuthWithEmail(username, password);
+
+                    SqlDataReader reader = cmd.ExecuteReader();
+
+                    if (reader.Read())
+                    {
+                        string role = reader["role"].ToString();
+
+                        bool locked = (bool)reader["locked"];
+
+
+                        if (locked == true)
+                        {
+                            Response.StatusCode = 401;
+                            Response.Write("Account has been locked!\nplease contact admin to reopen it.");
+                            Response.End();
+                        }
+
+                        if (role != "admin" && role != "system")
+                        {
+                            Response.StatusCode = 401;
+                            Response.Write("Account is not permission!\n\nPlease change account and retry.");
+                            Response.End();
+                        }
+                    }else
+                    {
+                        Response.StatusCode = 401;
+                        Response.Write("Token is not access!\n\nPlease Login again.");
+                        Response.End();
+                    }
+
+                    reader.Close();
+
+                    cmd.Cancel();
+
                 }
             }
         }
@@ -91,71 +168,81 @@ namespace BaiTapLon.admin
         protected void getData(string filter = null ,string sort = null ,int limit=10,int skip=0)
         {
 
-            string where = "";
-            string orderBy = "ORDER BY ID DESC";
-            if(!String.IsNullOrEmpty(filter))
-            {
-                where = "where " + filter;
-            }
-            if (!String.IsNullOrEmpty(sort))
-            {
-                orderBy = "order by " + sort;
-            }
-
             Response.ContentType = "application/json";
             try
             {
-                SqlCommand cmd = new SqlCommand("select * from tblSach " + where + orderBy, con);
+                SqlCommand cmd1 = procedure.countBooksWithFilter(filter);
+
+                SqlCommand cmd = procedure.selectBooksWithFilter(filter, sort, limit, skip * limit);
+
+                if (cmd == null || cmd1 == null) throw new Exception("System Error!");
+
+                object count = cmd1.ExecuteScalar();
                 SqlDataReader reader = cmd.ExecuteReader();
+
 
                 List<ClassSach> lists = new List<ClassSach>();
 
                 while (reader.Read())
                 {
-                    ClassSach sach = new ClassSach(Convert.ToInt32(reader["ID"]), reader["name"].ToString(), reader["category"].ToString(), reader["description"].ToString(), reader["imgSrc"].ToString(), Convert.ToInt32(reader["numberLike"]), Convert.ToInt32(reader["numberView"]));
+                    ClassSach sach = new ClassSach(Convert.ToInt32(reader["ID"]), reader["name"].ToString(), reader["category"].ToString(), reader["description"].ToString(), reader["imgSrc"].ToString(), Convert.ToInt32(reader["like"]), Convert.ToInt32(reader["view"]));
                     lists.Add(sach);
                 }
 
-                string[] data = new string[lists.Count];
+                reader.Close();
+                cmd1.Cancel();
+                cmd.Cancel();
+
+                string data = JsonConvert.SerializeObject(lists);
                 
-                skip = skip * limit;
-
-                int length = limit;
-
-                if (skip > lists.Count)
-                {
-                    skip = 0;
-                }else
-                {
-                    length = lists.Count - skip;
-                }
-
-                
-
-                if (length > limit)
-                {
-                    data = new string[limit];
-                }else
-                {
-                    data = new string[length];
-                }
-
-                
-
-                for (int i = 0; i < data.Length; i++)
-                {
-                    if (lists[skip + i] != null)
-                    {
-                        ClassSach item = lists[skip + i];
-                        data[i] = item.converString();
-                    }
-                }
-                Response.Write("{\"data\": [" + String.Join(",", data) + "], \"count\": " + lists.Count + "}");
+                Response.Write("{\"data\": " + data + ", \"count\": " + count.ToString() + "}");
             }
             catch(Exception ex)
             {
                 Response.StatusCode = 500;
-                Response.Write("{\"msg\": \""+ ex.Message + "\"}");
+                errMsg = new ErrorResponse(ex.Message);
+                Response.Write(JsonConvert.SerializeObject(errMsg));
+            }
+            Response.End();
+        }
+
+        protected void getAccounts(string filter = null, string sort = null, int limit = 10, int skip = 0)
+        {
+            try
+            {
+                SqlCommand cmd1 = procedure.countAuth(filter);
+
+                SqlCommand cmd = procedure.selectAuthAndUser(filter, sort, limit, skip * limit);
+
+                if (cmd == null || cmd1 == null) throw new Exception("System Error!");
+
+                object count = cmd1.ExecuteScalar();
+                SqlDataReader reader = cmd.ExecuteReader();
+
+                List<AuthofUser> lists = new List<AuthofUser>();
+
+                while (reader.Read())
+                {
+                    AuthofUser account = new AuthofUser(Convert.ToInt32(reader["ID"]), reader["name"].ToString(), reader["email"].ToString(), reader["birthday"].ToString(), reader["phone"].ToString(), (bool)reader["sex"], reader["role"].ToString(), (bool)reader["locked"]);
+                    lists.Add(account);
+                }
+
+                reader.Close();
+                cmd1.Cancel();
+                cmd.Cancel();
+
+
+                string data = JsonConvert.SerializeObject(lists);
+
+                Response.Write("{\"data\": " + data + ", \"count\": " + count.ToString() + "}");
+            }
+            catch (Exception ex)
+            {
+                Response.StatusCode = 500;
+
+                ErrorResponse errMsg = new ErrorResponse(ex.Message);
+
+                Response.Write(JsonConvert.SerializeObject(errMsg));
             }
             Response.End();
         }
@@ -167,9 +254,10 @@ namespace BaiTapLon.admin
             string value = form["valueCate"];
             if(!String.IsNullOrEmpty(name) && !String.IsNullOrEmpty(value))
             {
-                SqlCommand cmd = new SqlCommand("insert into tblCategory(name,category) values (N'"+name+"',N'"+value+"')",con);
+                SqlCommand cmd = procedure.insertCategoryInfo(name, value);
                 try
                 {
+                    if (cmd == null) throw new Exception("System Error!");
                     cmd.ExecuteNonQuery();
                     Response.StatusCode = 200;
                     Response.Write("{\"data\": \"Create Succes!\"}");
@@ -200,15 +288,15 @@ namespace BaiTapLon.admin
                 Response.Write("{\"msg\":\"Invalid Params!\"}");
             }else
             {
-                SqlCommand cmd = new SqlCommand("insert into tblSach (name,category,description,imgSrc)" +
-                    " output INSERTED.ID " +
-                    "values (N'"+name+"',N'"+category+"',N'"+desc+"',N'"+ imgSrc + "')",con);
+                SqlCommand cmd = procedure.insertBookInfo(name,category, desc, imgSrc); 
                 try
                 {
+                    if (cmd == null) throw new Exception("System Error!");
+
                     object output = cmd.ExecuteScalar();
                    
                     //tableSach.DataBind();
-                    Response.Write("{\"data\": \""+ output.ToString()+ "\"}");
+                    Response.Write("{\"data\": \""+ output?.ToString()+ "\"}");
                     Response.StatusCode = 200;
                 }catch (ThreadAbortException ex)
                 {
@@ -234,10 +322,12 @@ namespace BaiTapLon.admin
             }
             else
             {
-                string newData = "name = N'" + name + "' , category = N'" + category + "' , description = N'" + desc + "' , imgSrc = N'" + imgSrc + "'";
-                SqlCommand cmd = new SqlCommand("update tblSach set " + newData + " where ID = " + Convert.ToInt32(id), con);
+                SqlCommand cmd = procedure.updateBookInfo(Convert.ToInt32(id),name,category,desc,imgSrc);
                 try
                 {
+
+                    if (cmd == null) throw new Exception("System Error!");
+
                     cmd.ExecuteNonQuery();
 
                     Response.Write("{\"data\": \"Update Succes!\"}");
@@ -263,9 +353,11 @@ namespace BaiTapLon.admin
             }
             else
             {
-                SqlCommand cmd = new SqlCommand("delete from tblSach where ID = " + Convert.ToInt32(id), con);
+                SqlCommand cmd = procedure.deleteRowWithID(Convert.ToInt32(id), "Books"); 
+                    
                 try
                 {
+                    if (cmd == null) throw new Exception("System Error!");
                     cmd.ExecuteNonQuery();
 
                     Response.Write("{\"data\": \"Delete Succes!\"}");
@@ -278,6 +370,340 @@ namespace BaiTapLon.admin
                 }
             }
             Response.End();
+        }
+
+        protected void resetPassword(NameValueCollection form)
+        {
+            ErrorResponse errMsg;
+            try
+            {
+                string id = form["ID"];
+
+                if (id == null) throw new Exception("Invalid ID!");
+
+                int ID = Convert.ToInt32(id);
+
+                SqlCommand cmd = procedure.selectAuthWithID(ID);
+
+                SqlDataReader reader = cmd.ExecuteReader();
+
+                List<Auth> list = new List<Auth>();
+
+                while (reader.Read())
+                {
+                    Auth account = new Auth((int)reader["ID"], reader["username"].ToString(), (int)reader["userId"], reader["role"].ToString(), Convert.ToBoolean(reader["locked"])); 
+                    list.Add(account);
+                }
+
+                reader.Close();
+                cmd.Cancel();
+
+                if(list.Count < 0) {
+                    errMsg = new ErrorResponse("Account (ID="+ ID + ") not found!");
+                    Response.Write(JsonConvert.SerializeObject(errMsg));
+                }else if(list.Count > 1) {
+                    errMsg = new ErrorResponse("Account (ID=" + ID + ") is duplicated, please contact admin check!!");
+                    Response.Write(JsonConvert.SerializeObject(errMsg));
+                }else
+                {
+                    Auth account = (Auth)list[0];
+                    string random = DateTime.Now.ToFileTimeUtc().ToString();
+                    string newPwd = random.Substring(random.Length - 6, 6);
+                    Authorization authAccount = new Authorization(newPwd);
+                    cmd = procedure.updateAuthPassword(ID, authAccount.textEncrypted);
+
+                    try
+                    {
+                        object result = cmd.ExecuteScalar();
+
+                        if (result != null)
+                        {
+
+                            string bodyMail = "<h1>Tài khoản của bạn tại websach đã được thay đổi</h1></br></br>" +
+                                "<h3>Mật khẩu mới của bạn là: <strong>"+newPwd+"</strong></h3></br></br>" +
+                                "Đến trang của chúng tôi -> <a href='https://localhost:44398/view/HomePage.html'>Web sách</a>" +
+                                "<h2>Cảm ơn bạn đã sử dụng dịch vụ của chúng tôi</h1>";
+
+                            string status = sendEmail(account.username, bodyMail);
+
+                            if(status == "Success")
+                            {
+                                Response.Write("Password is reset Successfuly!\nNew password is send your mail!");
+                            }else
+                            {
+                                Response.Write("Password is reset Successfuly!\nBut send password to mail is faulty, please check or try again!");
+                            }
+                        }
+                        else
+                        {
+                            Response.Write("Reset password failed!!");
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        errMsg = new ErrorResponse(ex.Message);
+                        Response.Write(JsonConvert.SerializeObject(errMsg));
+                    }
+                }
+
+            }
+            catch (Exception ex)
+            {
+                Response.StatusCode = 500;
+                errMsg = new ErrorResponse(ex.Message);
+                Response.Write(JsonConvert.SerializeObject(errMsg));
+            }
+
+            Response.End();
+        }
+
+        protected void lockOrUnlockAccount(NameValueCollection form, bool isLock)
+        {
+            ErrorResponse errMsg;
+            Response.ContentType = "application/json";
+            try
+            {
+                string id = form["ID"];
+
+                if (id == null) throw new Exception("Invalid ID!");
+
+                int ID = Convert.ToInt32(id);
+
+                SqlCommand cmd = procedure.selectAuthWithID(ID);
+
+                SqlDataReader reader = cmd.ExecuteReader();
+
+                List<Auth> list = new List<Auth>();
+
+                while (reader.Read())
+                {
+                    Auth account = new Auth((int)reader["ID"], reader["username"].ToString(), (int)reader["userId"], reader["role"].ToString(), Convert.ToBoolean(reader["locked"]));
+                    list.Add(account);
+                }
+
+                reader.Close();
+                cmd.Cancel();
+
+                if (list.Count < 0)
+                {
+                    errMsg = new ErrorResponse("Account (ID=" + ID + ") not found!");
+                    Response.Write(JsonConvert.SerializeObject(errMsg));
+                }
+                else if (list.Count > 1)
+                {
+                    errMsg = new ErrorResponse("Account (ID=" + ID + ") is duplicated, please contact admin check!!");
+                    Response.Write(JsonConvert.SerializeObject(errMsg));
+                }
+                else
+                {
+                    Auth account = (Auth)list[0];
+                    
+                    if(account.role == "system")
+                    {
+                        Response.StatusCode = 400;
+                        Response.Write("Action failed!\nNot Permission!");
+                    }else
+                    {
+                        try
+                        {
+                            cmd = procedure.updateAuthLocked(ID, isLock);
+
+                            if (cmd == null) throw new Exception("System Error!");
+
+                            object result = cmd.ExecuteScalar();
+
+                            if (result != null)
+                            {
+                                string bodyMail;
+                                string subject;
+                                if (isLock)
+                                {
+                                    subject = "Account is locked";
+                                    bodyMail = "<h1>Tài khoản của bạn tại websach đã bị khóa do vi phạm</h1></br></br>" +
+                                    "<h3>Vui lòng liên hệ với quản trị viên để được hỗ trợ</strong></h3></br></br>" +
+                                    "Đến trang của chúng tôi -> <a href='https://localhost:44398/view/HomePage.html'>Web sách</a>" +
+                                    "<h1>Cảm ơn bạn đã sử dụng dịch vụ của chúng tôi</h1>";
+                                }
+                                else
+                                {
+                                    subject = "Account is unlocked";
+                                    bodyMail = "<h1>Tài khoản của bạn tại websach đã được mở khóa</h1></br></br>" +
+                                    "<h3>Cảm ơn bạn đã tin tưởng và sử dụng dịch vụ của chúng tôi</h3></br></br>" +
+                                    "Đến trang của chúng tôi -> <a href='https://localhost:44398/view/HomePage.html'>Web sách</a>";
+                                }
+
+                                string status = sendEmail(account.username, bodyMail, subject);
+
+                                if (status == "Success")
+                                {
+                                    Response.Write("Mail is sended to user!");
+                                }
+                                else
+                                {
+                                    Response.Write("Acction done!\nBut send notification to mail is faulty, please check or try again!");
+                                }
+                            }
+                            else
+                            {
+                                Response.StatusCode = 400;
+                                Response.Write("Action failed!!");
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            Response.StatusCode = 500;
+                            errMsg = new ErrorResponse(ex.Message);
+                            Response.Write(JsonConvert.SerializeObject(errMsg));
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Response.StatusCode = 500;
+                errMsg = new ErrorResponse(ex.Message);
+                Response.Write(JsonConvert.SerializeObject(errMsg));
+            }
+
+            Response.End();
+        }
+
+        protected void changeRoleAccount(NameValueCollection form)
+        {
+            ErrorResponse errMsg;
+            try
+            {
+                string id = form["ID"];
+                string role = form["value"];
+
+                if (id == null) throw new Exception("Invalid ID!");
+
+                int ID = Convert.ToInt32(id);
+
+                SqlCommand cmd = procedure.selectAuthWithID(ID);
+
+                SqlDataReader reader = cmd.ExecuteReader();
+
+                List<Auth> list = new List<Auth>();
+
+                while (reader.Read())
+                {
+                    Auth account = new Auth((int)reader["ID"], reader["username"].ToString(), (int)reader["userId"], reader["role"].ToString(), Convert.ToBoolean(reader["locked"]));
+                    list.Add(account);
+                }
+
+                reader.Close();
+                cmd.Cancel();
+
+                if (list.Count < 0)
+                {
+                    errMsg = new ErrorResponse("Account (ID=" + ID + ") not found!");
+                    Response.Write(JsonConvert.SerializeObject(errMsg));
+                }
+                else if (list.Count > 1)
+                {
+                    errMsg = new ErrorResponse("Account (ID=" + ID + ") is duplicated, please contact admin check!!");
+                    Response.Write(JsonConvert.SerializeObject(errMsg));
+                }
+                else
+                {
+                    Auth account = (Auth)list[0];
+
+                    if (account.role == "system")
+                    {
+                        Response.StatusCode = 400;
+                        Response.Write("Action failed!\nNot Permission!");
+                    }else
+                    {
+                        try
+                        {
+                            cmd = procedure.updateAuthRole(ID, role);
+
+                            if (cmd == null) throw new Exception("System Error");
+
+                            object result = cmd.ExecuteScalar();
+
+                            if (result != null)
+                            {
+                                string bodyMail;
+
+                                if (role == "admin")
+                                {
+                                    bodyMail = "<h1>Tài khoản của bạn tại websach đã được cấp quyền quản trị viên</h1></br></br>" +
+                                    "<h3>Hãy đăng nhập và sử dụng quyền lợi của quản trị viên.</strong></h3></br></br>" +
+                                    "Đến trang quản trị -> <a href='https://localhost:44398/admin/quanly.aspx'>Web sách</a>" +
+                                    "<h1>Cảm ơn bạn đã đồng hành cùng chúng tôi</h1>";
+                                }
+                                else
+                                {
+                                    bodyMail = "<h1>Tài khoản của bạn tại websach đã bị tước quyền quản trị viên</h1></br></br>" +
+                                    "<h3>Cảm ơn bạn đã tin tưởng và sử dụng dịch vụ của chúng tôi</h3></br></br>" +
+                                    "Đến trang của chúng tôi -> <a href='https://localhost:44398/view/HomePage.html'>Web sách</a>";
+                                }
+
+                                string status = sendEmail(account.username, bodyMail, "Change role Account");
+
+                                if (status == "Success")
+                                {
+                                    Response.Write("Mail is sended to user!");
+                                }
+                                else
+                                {
+                                    Response.Write("Acction done!\nBut send notification to mail is faulty, please check or try again!");
+                                }
+                            }
+                            else
+                            {
+                                Response.Write("Action failed!!");
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            errMsg = new ErrorResponse(ex.Message);
+                            Response.Write(JsonConvert.SerializeObject(errMsg));
+                        }
+                    }
+                }
+
+            }
+            catch (Exception ex)
+            {
+                Response.StatusCode = 500;
+                errMsg = new ErrorResponse(ex.Message);
+                Response.Write(JsonConvert.SerializeObject(errMsg));
+            }
+
+            Response.End();
+        }
+
+        protected string sendEmail(string sendTo, string body, string subject = "Reset Password")
+        {
+
+            SmtpClient smtpClient = new SmtpClient("smtp.gmail.com", 587);
+
+            smtpClient.Credentials = new System.Net.NetworkCredential("myshopstore31@gmail.com", "jfdoifyqymizmzbj");
+            smtpClient.DeliveryMethod = SmtpDeliveryMethod.Network;
+            smtpClient.EnableSsl = true;
+
+            MailMessage mail = new MailMessage();
+
+            //Setting From , To and CC
+            mail.From = new MailAddress("myshopstore31@gmail.com", "MyWeb Site");
+            mail.To.Add(new MailAddress(sendTo));
+            mail.Subject = subject;
+            mail.IsBodyHtml = true;
+            mail.Body = body;
+            try
+            {
+                smtpClient.Send(mail);
+
+                return "Success";
+
+            }
+            catch (Exception ex)
+            {
+                return ex.Message;
+            }
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Data;
@@ -15,6 +16,7 @@ namespace BaiTapLon.server
     public partial class homePage : System.Web.UI.Page
     {
         SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["SqlDB"].ConnectionString);
+        StoredProcedure procedure;
         protected void Page_Load(object sender, EventArgs e)
         {
             Response.ContentType = "application/json";
@@ -22,6 +24,7 @@ namespace BaiTapLon.server
             try
             {
                 con.Open();
+                procedure = new StoredProcedure(con);
                 if (Request.RequestType == "GET")
                 {
                     string pathInfo = Request.PathInfo;
@@ -34,7 +37,7 @@ namespace BaiTapLon.server
                         string NEW = getSachNEW();
                         string HOT = getSachHOT();
                         string VIEW = getSachViewest();
-                        response = "{\"data\": { \"hot\": [" + HOT + "], \"new\": [" + NEW + "], \"view\": [" + VIEW + "] }}";
+                        response = "{\"data\": { \"hot\": " + HOT + ", \"new\": " + NEW + ", \"view\": " + VIEW + " }}";
                     }
                 }
                 else
@@ -55,114 +58,104 @@ namespace BaiTapLon.server
             Response.ContentType = "application/json";
             try
             {
-                SqlCommand cmd = new SqlCommand("select * from tblCategory order by ID DESC", con);
+                SqlCommand cmd = procedure.selectCategoryWithFilter();
+
+                if (cmd == null) throw new Exception("System Error!");
+
                 SqlDataReader reader = cmd.ExecuteReader();
 
-                List<string> lists = new List<string>();
+                List<CategoryClass> lists = new List<CategoryClass>();
 
                 while (reader.Read())
                 {
-
-                    string category = "{\"key\": \"" + reader["name"] + "\", \"value\":\"" + reader["category"] + "\"}";
+                    CategoryClass category = new CategoryClass(reader["name"].ToString(), reader["key"].ToString());
                     lists.Add(category);
-
                 }
 
-                string[] data = new string[lists.Count];
+                string data = JsonConvert.SerializeObject(lists);
 
-                for (int i = 0; i < data.Length; i++)
-                {
-                    if (lists[i] != null)
-                    {
-                        data[i] = lists[i];
-                    }
-                }
-                Response.Write("{\"data\": [" + String.Join(",", data) + "]}");
+                Response.Write("{\"data\": " + data + "}");
             }
             catch (Exception ex)
             {
                 Response.StatusCode = 500;
-                Response.Write("{\"msg\":'" + ex.Message + "'}");
+                Response.Write("{\"msg\": \"" + ex.Message + "\"}");
             }
             Response.End();
         }
 
         protected string getSachHOT(int limit = 10, int skip = 0)
         {
-            SqlCommand cmd = new SqlCommand("select * from tblSach ORDER BY numberLike DESC OFFSET "+skip+" ROWS FETCH NEXT "+limit+" ROWS ONLY", con);
+
+            SqlCommand cmd = procedure.selectBooksWithFilter(null, "like DESC", limit, skip);
+
+            if (cmd == null) throw new Exception("System Error!");
+
             SqlDataReader reader = cmd.ExecuteReader();
 
             List<ClassSach> lists = new List<ClassSach>();
 
             while (reader.Read())
             {
-                ClassSach item = new ClassSach((int)reader["ID"], reader["name"].ToString(), reader["category"].ToString(), reader["description"].ToString(), reader["imgSrc"].ToString(), (int)reader["numberLike"], (int)reader["numberView"]);
+                ClassSach item = new ClassSach((int)reader["ID"], reader["name"].ToString(), reader["category"].ToString(), reader["description"].ToString(), reader["imgSrc"].ToString(), (int)reader["like"], (int)reader["view"]);
                 lists.Add(item);
             }
-            string[] data = new string[lists.Count];
-
-            for (int i = 0; i < lists.Count; i++)
-            {
-                ClassSach item = lists[i];
-                data[i] = item.converString();
-            }
+            string data = JsonConvert.SerializeObject(lists);
 
             reader.Close();
             cmd.Cancel();
 
-            return String.Join(",", data);
+            return data;
         }
 
         protected string getSachNEW(int limit = 10, int skip = 0)
         {
-            SqlCommand cmd = new SqlCommand("select * from tblSach ORDER BY ID DESC OFFSET " + skip + " ROWS FETCH NEXT " + limit + " ROWS ONLY", con);
+            SqlCommand cmd = procedure.selectBooksWithFilter(null, "ID DESC", limit, skip);
+            
+            if (cmd == null) throw new Exception("System Error!");
+            
             SqlDataReader reader = cmd.ExecuteReader();
+            
 
             List<ClassSach> lists = new List<ClassSach>();
 
             while (reader.Read())
             {
-                ClassSach item = new ClassSach((int)reader["ID"], reader["name"].ToString(), reader["category"].ToString(), reader["description"].ToString(), reader["imgSrc"].ToString(), (int)reader["numberLike"], (int)reader["numberView"]);
+                ClassSach item = new ClassSach((int)reader["ID"], reader["name"].ToString(), reader["category"].ToString(), reader["description"].ToString(), reader["imgSrc"].ToString(), (int)reader["like"], (int)reader["view"]);
                 lists.Add(item);
             }
-            string[] data = new string[lists.Count];
 
-            for (int i = 0; i < lists.Count; i++)
-            {
-                ClassSach item = lists[i];
-                data[i] = item.converString();
-            }
+            string data = JsonConvert.SerializeObject(lists);
 
             reader.Close();
             cmd.Cancel();
 
-            return String.Join(",", data);
+            return data;
         }
 
         protected string getSachViewest(int limit = 10, int skip = 0)
         {
-            SqlCommand cmd = new SqlCommand("select * from tblSach ORDER BY numberView DESC OFFSET " + skip + " ROWS FETCH NEXT " + limit + " ROWS ONLY", con);
+            SqlCommand cmd = procedure.selectBooksWithFilter(null, "view DESC", limit, skip);
+            
+            if (cmd == null) throw new Exception("System Error!");
+            
             SqlDataReader reader = cmd.ExecuteReader();
+
 
             List<ClassSach> lists = new List<ClassSach>();
 
             while (reader.Read())
             {
-                ClassSach item = new ClassSach((int)reader["ID"], reader["name"].ToString(), reader["category"].ToString(), reader["description"].ToString(), reader["imgSrc"].ToString(), (int)reader["numberLike"], (int)reader["numberView"]);
+                ClassSach item = new ClassSach((int)reader["ID"], reader["name"].ToString(), reader["category"].ToString(), reader["description"].ToString(), reader["imgSrc"].ToString(), (int)reader["like"], (int)reader["view"]);
                 lists.Add(item);
             }
-            string[] data = new string[lists.Count];
 
-            for (int i = 0; i < lists.Count; i++)
-            {
-                ClassSach item = lists[i];
-                data[i] = item.converString();
-            }
+            string data = JsonConvert.SerializeObject(lists);
 
             reader.Close();
             cmd.Cancel();
 
-            return String.Join(",", data);
+            return data;
         }
     }
 

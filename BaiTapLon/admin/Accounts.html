@@ -1,0 +1,62 @@
+﻿<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <title>Admin Accounts</title>
+    <link href="../style/GlobalStyles.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.3.0/css/all.min.css" integrity="sha512-SzlrxWUlpfuzQ+pcUCosxcglQRNAq/DZjVsC0lE40xsADsfeQoEypE+enwcOiGjk/bSuGGKHEyjSoQ1zVisanQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="../style/AdminAccounts.css" />
+    <script src="../script/request.js" defer></script>
+    <!--<script src="../script/handleImgError.js" type="text/javascript" defer></script>-->
+    <script src="../script/loading.js" type="text/javascript" defer></script>
+    <script src="../script/AdminAccount.js" defer></script>
+</head>
+<body>
+    <div class="account_container">
+        <div class="account_container-header">
+            <h1><a href="/view/HomePage.html" class="text_link"><i class="fa fa-home"></i></a> Quản lý tài khoản: <span class="span_text">(<span id="account_header-count" class="span_text">0</span> tài khoản)</span></h1>
+        </div>
+        <table border="1" id="tableAccount">
+            <thead>
+                <tr id="header_row">
+                    <td><button class="btn btn_ghost" type="button" onclick="sortBy(event,'ID',false)"><strong>ID</strong> <i class="fa fa-caret-down"></i></button></td>
+                    <td><strong>Name</strong></td>
+                    <td><strong>Email</strong></td>
+                    <td><strong>Birthday</strong></td>
+                    <td><strong>Phone</strong></td>
+                    <td><strong>Sex</strong></td>
+                    <td><strong>isAdmin</strong></td>
+                    <td><strong>isLocked</strong></td>
+                    <td><strong>Actions</strong></td>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td colspan="3"><button type="button" class="btn" onclick="handleChangePage(-1)"><i class="fa fa-arrow-left"></i>Prev</button></td>
+                    <td colspan="2">
+                        <div>
+                            <input type="number" name="pagination_input-page" class="pagination_page" value="1" onkeypress="handlePressEnter(event,getDataPage)" />
+                            of
+                            <span class="span_text" id="account_page-count"></span>
+                        </div>
+                    </td>
+                    <td colspan="4"><button type="button" class="btn" onclick="handleChangePage(1)">Next<i class="fa fa-arrow-right"></i></button></td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+</body>
+</html>

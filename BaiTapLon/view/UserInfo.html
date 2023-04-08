@@ -1,0 +1,49 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>User Info</title>
+    <link rel="stylesheet" href="../style/GlobalStyles.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.3.0/css/all.min.css" integrity="sha512-SzlrxWUlpfuzQ+pcUCosxcglQRNAq/DZjVsC0lE40xsADsfeQoEypE+enwcOiGjk/bSuGGKHEyjSoQ1zVisanQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="../style/FormStyle.css" />
+    <link rel="stylesheet" href="../style/UserInfo.css" />
+    <script src="../script/loading.js" defer></script>
+    <script src="../script/request.js" defer></script>
+    <script src="../script/UserInfo.js" defer></script>
+</head>
+<body>
+    <div class="userInfo_container">
+        <div class="siderBar_wrapper">
+            <div class="siderBar_body">
+                <div class="siderBar_logo">
+                    <a href="HomePage.html">
+                        <img src="../images/logo.jpg" alt="logo" title="logo" />
+                    </a>
+                </div>
+                <div class="siderBar_content">
+                    <div class="siderBar_menu-item" id="user_info" title="Thông tin tài khoản">
+                        <i class="fa fa-user"></i>
+                        <span>Thông tin tài khoản</span>
+                    </div>
+                    <div class="siderBar_menu-item" id="user_read" title="Đã đọc">
+                        <i class="fa fa-book"></i>
+                        <span>Đã đọc</span>
+                    </div>
+                    <div class="siderBar_menu-item" id="user_like" title="Yêu thích">
+                        <i class="fa fa-heart" style="color:red"></i>
+                        <span>Yêu thích</span>
+                    </div>
+                </div>
+                <div class="siderBar_footer">
+                    <div class="siderBar_menu-item" onclick="collapseSiderBar(event)">
+                        <i class="fa fa-caret-left"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="root-body" class="userInfo_container-body">
+            
+        </div>
+    </div>
+</body>
+</html>

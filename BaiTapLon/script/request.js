@@ -1,5 +1,5 @@
 ﻿function request(url, body, method = "POST") {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
         let xmlhttp = new XMLHttpRequest();
         xmlhttp.onreadystatechange = function () {
             if (this.readyState == 4) {
@@ -22,6 +22,11 @@
                     result.data = rs
                     result.count = count
                     resolve(result)
+                } else if (this.status === 401) {
+                    alert(this.responseText)
+                    result.data = this.responseText
+                    window.navigation.navigate('/view/UserAccount.html?redirect=true')
+                    resolve(result)
                 } else {
                     let rs
                     try {
@@ -31,7 +36,7 @@
                         rs = this.response
                     }
                     result.data = rs
-                    reject(result)
+                    resolve(result)
                 }
             }
 

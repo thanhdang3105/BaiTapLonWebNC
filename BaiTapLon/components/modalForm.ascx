@@ -222,17 +222,18 @@
         const formData = new FormData(form);
         const button = form.querySelector('button[type=submit]')
         formData.set('action', form.target)
-        formData.set('desc', JSON.stringify(formData.get("desc")))
         const file = formData.get('imgSrc')
+        let img = ""
         button.disabled = true
         const loading = document.createElement('i');
         loading.className = 'fa fa-spinner fa-spin';
         button.appendChild(loading)
         if (file.size > 0) {
             const fileName = formData.get('name')
-            const img = await firebaseUploadFile(file, fileName)
+            img = await firebaseUploadFile(file, fileName)
             formData.set('imgSrc', img);
         } else if (window.formFormModal?.fileUpload) {
+            img = formFormModal?.fileUpload
             formData.set('imgSrc', formFormModal?.fileUpload);
         } else {
             formData.set('imgSrc', '');
@@ -248,7 +249,7 @@
                     name: formData.get('name'),
                     category: formData.get('category'),
                     desc: formData.get('desc'),
-                    imgSrc: window.formFormModal?.fileUpload || '',
+                    imgSrc: img,
                     like: 0,
                     view: 0
                 }
@@ -260,7 +261,7 @@
                         const keys = Object.keys(item)
                         keys.map(key => {
                             if (formData.get(key) !== null) {
-                                item[key] = formData.get(key)
+                               item[key] = formData.get(key)
                             }
                         })
                     }

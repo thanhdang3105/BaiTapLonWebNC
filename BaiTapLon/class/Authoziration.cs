@@ -52,9 +52,9 @@ namespace BaiTapLon.server
             }
         }
 
-        public string generateToken(string text, string role = "admin")
+        public string generateToken(string text, string text2)
         {
-            string token = text + "-" + DateTime.UtcNow.AddDays(7).ToString() + "-" + role;
+            string token = text + "-" + DateTime.UtcNow.AddDays(7).ToString() + "-" + text2;
             string encryptToken = encode(token);
             return encryptToken;
         }
