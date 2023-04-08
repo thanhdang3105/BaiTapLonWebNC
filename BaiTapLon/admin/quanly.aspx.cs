@@ -171,6 +171,15 @@ namespace BaiTapLon.admin
             Response.ContentType = "application/json";
             try
             {
+                if (limit == 0)
+                {
+                    limit = 10;
+                }
+                if (skip < 0)
+                {
+                    skip = 0;
+                }
+
                 SqlCommand cmd1 = procedure.countBooksWithFilter(filter);
 
                 SqlCommand cmd = procedure.selectBooksWithFilter(filter, sort, limit, skip * limit);
