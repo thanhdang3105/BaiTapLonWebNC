@@ -6,11 +6,9 @@ function toggleAction() {
     if (switchView) {
         if (switchView.classList.contains('right')) {
             switchView.classList.remove('right')
-            switchView.innerText = 'Chào mừng bạn trở lại với Web Sách'
             resetForm(formRegister)
         } else {
             switchView.classList.add('right')
-            switchView.innerText = 'Tạo tài khoản để trở thành 1 thành viên của Web Sách'
             resetForm(formLogin)
         }
     }

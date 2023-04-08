@@ -178,10 +178,19 @@ namespace BaiTapLon.server
         protected void Login(string username, string password)
         {
             string errorMsg = "Login Failed!";
+
             try
             {
-                if (username != null && password != null)
+                object countt = Session["CountLoginFail"];
+                DateTime dt = Convert.ToDateTime(Session["LockTime"]);
+                int time = DateTime.Now.CompareTo(dt);
+                if (countt != null && (int)countt > 3 && time < 0)
                 {
+                    errorMsg = "Tài khoản bạn đã bị khóa!.";
+                }                           
+                else if (username != null && password != null)
+                {
+
                     Authorization BasicAuth = new Authorization(password);
 
                     SqlCommand cmd = procedure.selectAuthWithEmail(username, BasicAuth.textEncrypted);
@@ -216,7 +225,7 @@ namespace BaiTapLon.server
                     if (locked != 0)
                     {
                         Response.StatusCode = 400;
-                        Response.Write("{\"msg\":\"Account has been locked!\nplease contact admin to reopen it.\"}");
+                        Response.Write("Account has been locked!\\nplease contact admin to reopen it.");
                         return;
                     }
 
@@ -256,6 +265,12 @@ namespace BaiTapLon.server
                     }
                     else
                     {
+                        int count = Convert.ToInt32(Session["CountLoginFail"]) + 1;
+                        if (count > 3)
+                        {
+                            Session["LockTime"] = DateTime.Now.AddMinutes(2);
+                        }
+                        Session["CountLoginFail"] = count + 1;
                         errorMsg = "Sai tên đăng nhập hoặc mật khẩu!";
                     }
                 }
@@ -265,7 +280,7 @@ namespace BaiTapLon.server
                 Response.StatusCode = 500;
                 errorMsg = ex.Message;
             }
-            Response.Write("{\"msg\":\""+ errorMsg +"\"}");
+            Response.Write(errorMsg);
             Response.End();
         }
 
@@ -361,7 +376,7 @@ namespace BaiTapLon.server
                     string message = sendEmail(sendTo);
                     if (message == "Send OTP to Mail")
                     {
-                        Response.Write("Semd OTP to Mail");
+                        Response.Write("Send OTP to Mail");
                     }else
                     {
                         Response.StatusCode = 500;
@@ -527,7 +542,7 @@ namespace BaiTapLon.server
                 Session[sendTo] = otp;
 
 
-                return "Semd OTP to Mail";
+                return "Send OTP to Mail";
 
             }
             catch (Exception ex)
