@@ -91,6 +91,8 @@
     <Content Include="images\bgHeader.jpg" />
     <Content Include="images\logo.jpg" />
     <Content Include="images\OIP.jpg" />
+    <Content Include="style\ReadingPage.css" />
+    <Content Include="view\ReadingPage.aspx" />
     <Content Include="script\AdminAccount.js" />
     <Content Include="script\DetailPage.js" />
     <Content Include="script\firebase.js" />
@@ -136,6 +138,13 @@
     <Compile Include="class\GlobalClass.cs" />
     <Compile Include="class\SexFormat.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="view\ReadingPage.aspx.cs">
+      <DependentUpon>ReadingPage.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="view\ReadingPage.aspx.designer.cs">
+      <DependentUpon>ReadingPage.aspx</DependentUpon>
+    </Compile>
     <Compile Include="server\DetailPage.aspx.cs">
       <DependentUpon>DetailPage.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>

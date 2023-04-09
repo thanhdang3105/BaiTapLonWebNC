@@ -18,7 +18,7 @@ async function getData() {
                             <img src="${item.imgSrc}" onerror="handleImgError(event)"  title="img-${item.name}" alt="img-${item.name}" />
                        </a>
                         <div class="item_info">
-                            <a href="/view/DetailPage.html" class="item_info-name text_link">${item.name}</a>
+                            <a href="/view/ReadingPage.aspx?id=${item.id}" class="item_info-name text_link">${item.name}</a>
                             <span class="item_info-desc">${item.desc.toString()}</span>
                             <div class="item_info-rate">
                                 <span class="info_rate-like span_text">${item.like} <i class="fa fa-heart"></i></span>
