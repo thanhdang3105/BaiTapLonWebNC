@@ -538,6 +538,15 @@ namespace BaiTapLon.server {
 
             return cmd;
         }
+        public SqlCommand selectBookwithId(int id)
+        {
+            if (id < 1 )return null;
+
+            SqlCommand cmd = new SqlCommand("SelectBooksWithID", conn);
+            cmd.CommandType = CommandType.StoredProcedure;
+            cmd.Parameters.Add("@ID", SqlDbType.Int).Value = id;
+            return cmd;
+        }
 
         public SqlCommand countBooksWithFilter(string filter)
         {
