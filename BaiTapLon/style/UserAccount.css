@@ -5,7 +5,7 @@
     justify-content: center;
     width: 100%;
     height: 100vh;
-    background: linear-gradient(135deg,blue,aqua,white,yellow);
+    background-image: url("../images/bg_sach.jpg");
 }
 
 .wrapper_body {
@@ -22,7 +22,8 @@
     left: 0;
     right: 50%;
     bottom: 0;
-    background-color: greenyellow;
+    background-image: url("../images/login.jpeg");
+    background-size: cover;
     transition: all 0.3s linear;
     display: flex;
     align-items: center;
@@ -37,6 +38,7 @@
 .switch_view.right{
     left: 50%;
     right: 0;
+    background-image: url("../images/signup.jpg");
 }
 
 .body_content {
@@ -46,6 +48,8 @@
     padding: 20px;
     display: flex;
     align-items: center;
+    background-image: url("../images/LogDetail.jpg");
+    background-size: contain;
 }
 
 .body_content > form {
@@ -69,7 +73,9 @@ form > button {
 
 .body_content > form > p.text_link {
     text-align: center;
+    color: red;
 }
+
 
 .content_header{
     width: max-content;

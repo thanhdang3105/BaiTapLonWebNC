@@ -89,8 +89,12 @@
     <Content Include="admin\Accounts.html" />
     <Content Include="admin\quanly.aspx" />
     <Content Include="images\bgHeader.jpg" />
+    <Content Include="images\bg_sach.jpg" />
+    <Content Include="images\LogDetail.jpg" />
+    <Content Include="images\login.jpeg" />
     <Content Include="images\logo.jpg" />
     <Content Include="images\OIP.jpg" />
+    <Content Include="images\signup.jpg" />
     <Content Include="script\AdminAccount.js" />
     <Content Include="script\DetailPage.js" />
     <Content Include="script\firebase.js" />
