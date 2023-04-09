@@ -181,12 +181,11 @@ namespace BaiTapLon.server
 
             try
             {
-                object countt = Session["CountLoginFail"];
-                DateTime dt = Convert.ToDateTime(Session["LockTime"]);
+                DateTime dt = Convert.ToDateTime(Session["lockExpriedAt"]);
                 int time = DateTime.Now.CompareTo(dt);
-                if (countt != null && (int)countt > 3 && time < 0)
+                if (time < 0)
                 {
-                    errorMsg = "Tài khoản bạn đã bị khóa!.";
+                    errorMsg = "Bạn nhập sai quá nhiều vui lòng quay lại sau: " + dt.ToLongTimeString() + "!";
                 }                           
                 else if (username != null && password != null)
                 {
@@ -266,9 +265,11 @@ namespace BaiTapLon.server
                     else
                     {
                         int count = Convert.ToInt32(Session["CountLoginFail"]) + 1;
-                        if (count > 3)
+                        int maxCountLogin = Convert.ToInt32(ConfigurationManager.AppSettings.Get("maxCountLogin"));
+                        int timeLocked = Convert.ToInt32(ConfigurationManager.AppSettings.Get("timeLocked"));
+                        if (count > maxCountLogin)
                         {
-                            Session["LockTime"] = DateTime.Now.AddMinutes(2);
+                            Session["lockExpriedAt"] = DateTime.Now.AddMinutes(timeLocked);
                         }
                         Session["CountLoginFail"] = count + 1;
                         errorMsg = "Sai tên đăng nhập hoặc mật khẩu!";

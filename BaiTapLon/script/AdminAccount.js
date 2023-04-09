@@ -1,6 +1,6 @@
 ﻿window.addEventListener("DOMContentLoaded", () => {
     window.adminAccount = {
-        limit: 2,
+        limit: 10,
         skip: 0
     }
     getData()

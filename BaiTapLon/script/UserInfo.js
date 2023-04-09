@@ -332,7 +332,7 @@ async function getUserRead() {
                     <ul class="body_content-list">
                         ${Array.isArray(res.data) && res.data.map(item => `<li class="item_list">
                             <a href="/view/DetailPage.html" class="item_list-img">
-                                <img src="../images/OIP.jpg" onerror="handleImgError(event)" title="img-${item.name}" alt="img-${item.name}" />
+                                <img src="${item.imgSrc}" onerror="handleImgError(event)" title="img-${item.name}" alt="img-${item.name}" />
                             </a>
                             <div class="item_info">
                                 <a href="/view/DetailPage.html" class="item_info-name text_link">${item.name}</a>
@@ -450,7 +450,7 @@ async function getUserLike() {
                     <ul class="body_content-list">
                         ${Array.isArray(res.data) && res.data.map(item => `<li class="item_list">
                             <a href="/view/DetailPage.html" class="item_list-img">
-                                <img src="../images/OIP.jpg" onerror="handleImgError(event)" title="img-${item.name}" alt="img-${item.name}" />
+                                <img src="${item.imgSrc}" onerror="handleImgError(event)" title="img-${item.name}" alt="img-${item.name}" />
                             </a>
                             <div class="item_info">
                                 <a href="/view/DetailPage.html" class="item_info-name text_link">${item.name}</a>
