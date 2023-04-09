@@ -48,7 +48,7 @@ async function createSubHeader() {
             query[key] = value;
         }
     }
-    if (window.location.pathname.includes('HomePage.html')) {
+    if (!window.location.pathname.includes('DetailPage.html')) {
         query = ''
     }
     window.query = query;
