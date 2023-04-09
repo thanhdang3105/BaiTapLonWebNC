@@ -1,4 +1,9 @@
 ﻿const element = {}
+const api = {
+    user_info: getUserInfo,
+    user_read: getUserRead,
+    user_like: getUserLike
+}
 let userInfo = sessionStorage.getItem("userInfo")
 try {
     userInfo = JSON.parse(userInfo)
@@ -150,11 +155,14 @@ async function getUserInfo() {
         }
 
         const div = document.createElement('div')
-        //div.id = 'user_info'
+        div.id = 'user_info-wrapper'
+        div.classList.add('wrapper_content')
         div.appendChild(form)
         div.appendChild(form2)
 
-        element.user_info = div 
+        element.user_info = {
+            element: div
+        } 
     } else {
         alert("Vui lòng đăng nhập.")
         window.navigation.navigate('/view/UserAccount.html?redirect=true')
@@ -251,14 +259,19 @@ async function handleSubmitForm(event) {
 
     unLoading()
 
-    if (res.status === 200) {
-        alert(res.data)
+    if (res.status === 200) { 
         Object.keys(userInfo).map(item => {
             if (formData.get(item)) {
                 userInfo[item] = formData.get(item)
             }
         })
         try {
+            if (res?.data?.token) {
+                res.data.msg && alert(res.data.msg)
+                localStorage.setItem('tokenWebSach', res.data.token)
+            } else {
+                alert(res.data)
+            }
             sessionStorage.setItem('userInfo', JSON.stringify(userInfo))
         } catch {
             sessionStorage.setItem('userInfo', userInfo)
@@ -275,19 +288,205 @@ async function handleSubmitForm(event) {
 // --------------------------------------------------------------------------------------------- \\
 
 async function getUserRead() {
+
+    const currentState = element.user_read
+
+    let sort = 'ID DESC'
+    let page = 1
+    let limit = 10
+
+    if (currentState) {
+        if (currentState.sort) sort = currentState.sort
+        if (currentState.page) page = currentState.page
+        if (currentState.limit) limit = currentState.limit
+    }
+
+    const params = new URLSearchParams()
+    params.set('sort', sort)
+    params.set("skip", page - 1)
+    params.set('limit',limit)
+
+    loading()
+    const res = await request('/admin/quanly.aspx/getData?' + params.toString(),null,"GET")
+    unLoading()
+
     const div = document.createElement('div')
-    //div.id = 'user_read'
-    element.user_read = div
+    div.id = 'user_read-wrapper'
+    div.classList.add('wrapper_content')
+
+    if (res.status === 200) {
+
+        const pageCount = []
+
+        for (let i = 1; i <= Math.ceil(res.count / 10); i++) {
+            pageCount.push(1)
+        }
+
+        div.innerHTML = `<div class="body_header-control">
+                        <h1 class="body_header-title">Sách đã đọc: (${res.count} sách)</h1>
+                        <select id="control_sort" class="select_sort" onchange="handleChangeSort(event,'user_read')">
+                            <option value="ID DESC" ${sort === 'ID DESC' ? 'selected' : ''}>Gần đây nhất</option>
+                            <option value="ID ASC" ${sort === 'ID ASC' ? 'selected' : ''}>Cũ nhất</option>
+                        </select>
+                    </div>
+                    <ul class="body_content-list">
+                        ${Array.isArray(res.data) && res.data.map(item => `<li class="item_list">
+                            <a href="/view/DetailPage.html" class="item_list-img">
+                                <img src="../images/OIP.jpg" onerror="handleImgError(event)" title="img-${item.name}" alt="img-${item.name}" />
+                            </a>
+                            <div class="item_info">
+                                <a href="/view/DetailPage.html" class="item_info-name text_link">${item.name}</a>
+                                <span class="item_info-desc span_text">${item.author}</span>
+                                <span class="item_info-desc">${item.category.key}</span>
+                                <div class="item_info-rate">
+                                    <span class="info_rate-like span_text">${item.like} <i class="fa fa-heart"></i></span>
+                                    <span class="info_rate-view span_text">${item.view} <i class="fa fa-eye"></i></span>
+                                </div>
+                            </div>
+                        </li>`).join(" ")}
+                    </ul>
+                    <div class="body_footer-control">
+                        <ul class="pagination_box">
+                            ${pageCount.map((i, index) => `
+                                <li class="pagination_item ${page == i + index ? 'active' : ''}" onclick="handleChangePage(event,${i + index})">${i + index}</li>
+                            `).join(" ")}
+                        </ul>
+                    </div>`
+
+
+    } else {
+        if (res.msg) {
+            alert(res.msg)
+            div.append(res.msg)
+        }
+    }
+
+    element.user_read = {
+        element: div,
+        sort,
+        page,
+        limit
+    }
+    return div
 }
+
+async function handleChangeSort(event,id) {
+    const value = event.target.value
+    const currentState = element[id]
+    if (currentState) {
+        if (currentState.sort === value) {
+            return
+        } else {
+            currentState.sort = value
+            loading()
+            stateUserInfo.element = await api[id]()
+            setActiveTab()
+            unLoading()
+        }
+    }
+}
+
+async function handleChangePage(e, i, id) {
+    const item = e.target
+    if (item.classList.contains('active') || item.innerText == i || i < 1) {
+        return
+    } else {
+        if (element[id]) {
+            element[id].page = Number(i) || 1
+            loading()
+            stateUserInfo.element = await api[id]()
+            setActiveTab()
+            unLoading()
+        }
+    }
+}
+
 
 // --------------------------------------------------------------------------------------------- \\
 // ---------------------------------------User like--------------------------------------------- \\
 // --------------------------------------------------------------------------------------------- \\
 
 async function getUserLike() {
+    const currentState = element.user_like
+
+    let sort = 'ID DESC'
+    let page = 1
+    let limit = 10
+
+    if (currentState) {
+        if (currentState.sort) sort = currentState.sort
+        if (currentState.page) page = currentState.page
+        if (currentState.limit) limit = currentState.limit
+    }
+
+    const params = new URLSearchParams()
+    params.set('sort', sort)
+    params.set("skip", page - 1)
+    params.set('limit', limit)
+
+    loading()
+    const res = await request('/admin/quanly.aspx/getData?' + params.toString(), null, "GET")
+    unLoading()
+
     const div = document.createElement('div')
-    //div.id = 'user_like'
-    element.user_like = div
+    div.id = 'user_like-wrapper'
+    div.classList.add('wrapper_content')
+
+    if (res.status === 200) {
+
+        const pageCount = []
+
+        for (let i = 1; i <= Math.ceil(res.count / 10); i++) {
+            pageCount.push(1)
+        }
+
+        div.innerHTML = `<div class="body_header-control">
+                        <h1 class="body_header-title">Sách yêu thích: (${res.count} sách)</h1>
+                        <select id="control_sort" class="select_sort" onchange="handleChangeSort(event,'user_like')">
+                            <option value="ID DESC" ${sort === 'ID DESC' ? 'selected' : ''}>Gần đây nhất</option>
+                            <option value="ID ASC" ${sort === 'ID ASC' ? 'selected' : ''}>Cũ nhất</option>
+                        </select>
+                    </div>
+                    <ul class="body_content-list">
+                        ${Array.isArray(res.data) && res.data.map(item => `<li class="item_list">
+                            <a href="/view/DetailPage.html" class="item_list-img">
+                                <img src="../images/OIP.jpg" onerror="handleImgError(event)" title="img-${item.name}" alt="img-${item.name}" />
+                            </a>
+                            <div class="item_info">
+                                <a href="/view/DetailPage.html" class="item_info-name text_link">${item.name}</a>
+                                <span class="item_info-desc span_text">${item.author}</span>
+                                <span class="item_info-desc">${item.category.key}</span>
+                                <div class="item_info-rate">
+                                    <span class="info_rate-like span_text">${item.like} <i class="fa fa-heart"></i></span>
+                                    <span class="info_rate-view span_text">${item.view} <i class="fa fa-eye"></i></span>
+                                </div>
+                            </div>
+                        </li>`).join(" ")}
+                    </ul>
+                    <div class="body_footer-control">
+                        <ul class="pagination_box">
+                            ${pageCount.map((i, index) => `
+                                <li class="pagination_item ${page == i + index ? 'active' : ''}" onclick="handleChangePage(event,${i + index})">${i + index}</li>
+                            `).join(" ")}
+                        </ul>
+                    </div>`
+
+
+    } else {
+        if (res.msg) {
+            alert(res.msg)
+            div.append(res.msg)
+        }
+    }
+
+    element.user_like = {
+        element: div,
+        sort,
+        page,
+        limit
+    }
+
+    return div
 }
 
 // --------------------------------------------------------------------------------------------- \\
@@ -295,15 +494,11 @@ async function getUserLike() {
 // --------------------------------------------------------------------------------------------- \\
 
 window.addEventListener("DOMContentLoaded", async () => {
-    loading()
     await getUserInfo()
-    await getUserRead()
-    await getUserLike()
     window.stateUserInfo = {
         active: 'user_info',
-        element: element['user_info']
+        element: element['user_info'].element
     }
-    unLoading()
     setActiveTab()
 })
 
@@ -328,18 +523,16 @@ function setActiveTab() {
     const currentElement = stateUserInfo.element
     const listTab = document.querySelectorAll('.siderBar_content .siderBar_menu-item')
     const root = document.getElementById('root-body')
-    if (root.children.length === 0) {
-        root.appendChild(currentElement)
-    }
     for (let tab of listTab) {
-        console.log(root.contains(element[tab.id]))
-        if (root.contains(element[tab.id])) {
-            root.replaceChild(currentElement, element[tab.id])
-        }
-        tab.onclick = () => {
+        let ele = element[tab.id]?.element
+        tab.onclick = async () => {
             if (stateUserInfo.active != tab.id) {
                 stateUserInfo.active = tab.id
-                stateUserInfo.element = element[tab.id]
+                if (ele) {
+                    stateUserInfo.element = ele
+                } else {
+                    stateUserInfo.element = await api[tab.id]()
+                }
                 setActiveTab()
             }
         }
@@ -349,5 +542,11 @@ function setActiveTab() {
             tab.classList.remove("active")
         }
     }
+    if (root.children.length === 0) {
+        root.appendChild(currentElement)
+    } else {
+        root.replaceChild(currentElement, root.children[0])
+    }
+
 }
 

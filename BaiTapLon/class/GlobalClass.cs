@@ -2,6 +2,7 @@
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Data;
 using System.Data.SqlClient;
 using System.Data.SqlTypes;
@@ -174,6 +175,20 @@ namespace BaiTapLon.server {
             this.role = role;
             this.locked = locked;
         }
+    }
+
+    class FilterBooks
+    {
+        [DefaultValue(0)]
+        public int ID { get; set; }
+        [DefaultValue("")]
+        public string name { get; set; }
+        [DefaultValue("")]
+        public string author { get; set; }
+        [DefaultValue("")]
+        public string category { get; set; }
+        
+        public FilterBooks() { }
     }
 
     class StoredProcedure 
@@ -427,7 +442,7 @@ namespace BaiTapLon.server {
             return cmd;
         }
 
-        public SqlCommand insertBookInfo(string name, string category, string description, string imgSrc)
+        public SqlCommand insertBookInfo(string name, string author, string category, string description, string imgSrc)
         {
             if (String.IsNullOrEmpty(name) || String.IsNullOrEmpty(category)) return null;
 
@@ -435,14 +450,15 @@ namespace BaiTapLon.server {
             cmd.CommandType = CommandType.StoredProcedure;
 
             cmd.Parameters.Add(new SqlParameter("@Name", name));
+            cmd.Parameters.Add(new SqlParameter("@Author", author));
             cmd.Parameters.Add(new SqlParameter("@Category", category));
-            cmd.Parameters.Add(new SqlParameter("@Description", description));
+            cmd.Parameters.Add(new SqlParameter("@Content", description));
             cmd.Parameters.Add(new SqlParameter("@ImgSrc", imgSrc));
 
             return cmd;
         }
 
-        public SqlCommand updateBookInfo(int ID, string name, string category, string description, string imgSrc)
+        public SqlCommand updateBookInfo(int ID, string name, string author, string category, string description, string imgSrc)
         {
             if (ID < 1 || String.IsNullOrEmpty(name) || String.IsNullOrEmpty(category)) return null;
 
@@ -451,8 +467,9 @@ namespace BaiTapLon.server {
 
             cmd.Parameters.Add(new SqlParameter("@ID", ID));
             cmd.Parameters.Add(new SqlParameter("@Name", name));
+            cmd.Parameters.Add(new SqlParameter("@Author", author));
             cmd.Parameters.Add(new SqlParameter("@Category", category));
-            cmd.Parameters.Add(new SqlParameter("@Description", description));
+            cmd.Parameters.Add(new SqlParameter("@Content", description));
             cmd.Parameters.Add(new SqlParameter("@ImgSrc", imgSrc));
 
             return cmd;
@@ -476,34 +493,48 @@ namespace BaiTapLon.server {
             SqlCommand cmd = new SqlCommand("SelectBooksWithFilter", conn);
             cmd.CommandType = CommandType.StoredProcedure;
 
-
             if (String.IsNullOrEmpty(filter))
             {
-                filter = "";
-            }else if (!filter.Contains('=') && !filter.Contains("like"))
+                filter = "{}";
+            }
+
+            FilterBooks query =  JsonConvert.DeserializeObject<FilterBooks>(filter);
+
+            if (String.IsNullOrEmpty(sort))
             {
-                return null;
+                sort = "";
+            }
+
+            cmd.Parameters.Add(new SqlParameter("@ID", query.ID));
+            cmd.Parameters.Add(new SqlParameter("@Name", query.name));
+            cmd.Parameters.Add(new SqlParameter("@Author", query.author));
+            cmd.Parameters.Add(new SqlParameter("@Category", query.category));
+            cmd.Parameters.Add(new SqlParameter("@Sort", sort));
+            cmd.Parameters.Add(new SqlParameter("@Limit",limit == 0 ? 10 : limit));
+            cmd.Parameters.Add(new SqlParameter("@Skip", skip < 0 ? 0 : skip));
+
+            return cmd;
+        }
+
+        public SqlCommand selectBooksWithSearch(string search, string sort, int limit, int skip)
+        {
+            SqlCommand cmd = new SqlCommand("SelectBooksWithSearch", conn);
+            cmd.CommandType = CommandType.StoredProcedure;
+
+            if (String.IsNullOrEmpty(search))
+            {
+                search = "";
             }
 
             if (String.IsNullOrEmpty(sort))
             {
                 sort = "";
-            }else
-            {
-                string[] arr = sort.Split(' ');
-                if(arr.Length != 2)
-                {
-                    sort = "";
-                }else
-                {
-                    sort = "["+ arr[0]+"] " + arr[1];
-                }
             }
 
-            cmd.Parameters.Add(new SqlParameter("@Filter", filter));
+            cmd.Parameters.Add(new SqlParameter("@Search", search));
             cmd.Parameters.Add(new SqlParameter("@Sort", sort));
-            cmd.Parameters.Add(new SqlParameter("@Limit",limit == null ? 10 : limit));
-            cmd.Parameters.Add(new SqlParameter("@Skip", skip == null ? 0 : skip));
+            cmd.Parameters.Add(new SqlParameter("@Limit", limit == 0 ? 10 : limit));
+            cmd.Parameters.Add(new SqlParameter("@Skip", skip < 0 ? 0 : skip));
 
             return cmd;
         }

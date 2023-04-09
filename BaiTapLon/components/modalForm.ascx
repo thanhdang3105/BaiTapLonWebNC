@@ -17,6 +17,14 @@
                 <span>Error</span>
             </div>
         </div>
+        <label for="author">Tên tác giả</label>
+        <div class="wrapper_input">
+            <input name="author" type="text" title="Vui lòng nhập tên tác giả!"  placeholder="Tên tác giả..." />
+            <div class="error_info">
+                Message: 
+                <span>Error</span>
+            </div>
+        </div>
         <label for="category">Thể loại</label>
         <div class="wrapper_input">
             <select name="category" required onchange="handleSelect(event)">
@@ -28,9 +36,9 @@
                 <span>Error</span>
             </div>
         </div>
-        <label for="desc">Mô tả</label>
+        <label for="content">Nội dung</label>
         <div class="wrapper_input">
-            <textarea name="desc" title="Vui lòng nhập mô tả sách!" placeholder="Mô tả"></textarea>
+            <textarea name="content" title="Vui lòng nhập nội dung sách!" placeholder="Nội dung"></textarea>
             <div class="error_info">
                 Message:
                 <span>Error</span>
@@ -166,7 +174,7 @@
             const form = document.createElement('form')
             form.className = "createItem"
             form.innerHTML = `
-                <input name="nameCate" type="text" title="Vui lòng nhập Name" placeholder="Name" required />
+                <input name="nameCate" type="text" title="Vui lòng nhập Label" placeholder="Label" required />
                 <input name="valueCate" type="text" title="Vui lòng nhập Value" placeholder="Value" required />
                 <i class="fa fa-check icon_button" onclick="handleNewItem(event,true)"></i>
                 <i class="fa fa-close icon_button" onclick="handleNewItem(event,false)"></i>
@@ -216,6 +224,26 @@
         buttonModal.disabled = false
     }
 
+    function findCategoryByKey(key = "") {
+        const select = document.querySelector("#formModal select[name=category]")
+        if (key == "") {
+            return {
+                key: "",
+                value: ""
+            }
+        }
+        let result
+        for (let option of select.options) {
+            if (option.value === key) {
+                result = {
+                    key: option.label,
+                    value: option.value
+                }
+            }
+        }
+        return result
+    }
+
     async function submitForm(event) {
         event.preventDefault();
         const form = event.target
@@ -247,8 +275,9 @@
                 const newRow = {
                     id: res.data,
                     name: formData.get('name'),
-                    category: formData.get('category'),
-                    desc: formData.get('desc'),
+                    author: formData.get('author') || 'Unknown Author',
+                    category: findCategoryByKey(formData.get('category')),
+                    content: formData.get('content'),
                     imgSrc: img,
                     like: 0,
                     view: 0
@@ -261,7 +290,11 @@
                         const keys = Object.keys(item)
                         keys.map(key => {
                             if (formData.get(key) !== null) {
-                               item[key] = formData.get(key)
+                                if (key == 'category') {
+                                    item[key] = findCategoryByKey(formData.get(key))
+                                } else {
+                                    item[key] = formData.get(key)
+                                }
                             }
                         })
                     }

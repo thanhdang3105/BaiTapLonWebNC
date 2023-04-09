@@ -27,8 +27,9 @@
                 <tr id="header_row">
                     <td><button class="btn btn_ghost" type="button" onclick="sortBy(event,'ID',false)"><strong>ID</strong> <i class="fa fa-caret-down"></i></button></td>
                     <td><strong>Name</strong></td>
+                    <td><strong>Author</strong></td>
                     <td><strong>Category</strong></td>
-                    <td><strong>Description</strong></td>
+                    <td><strong>Content</strong></td>
                     <td><strong>Image</strong></td>
                     <td><button class="btn btn_ghost" type="button" onclick="sortBy(event,'like',true)"><strong>Like</strong></button></td>
                     <td><button class="btn btn_ghost" type="button" onclick="sortBy(event,'view',true)"><strong>View</strong></button></td>
@@ -49,7 +50,7 @@
             <tfoot>
                 <tr>
                     <td colspan="3"><button type="button" class="btn" onclick="handleChangePage(-1)"><i class="fa fa-arrow-left"></i>Prev</button></td>
-                    <td colspan="2"><div>
+                    <td colspan="3"><div>
                         <input type="number" name="pagination_input-page" class="pagination_page" value="1" oninput="validationInputPage(event)" onkeypress="handlePressEnter(event,getDataPage)" onblur="getDataPage(event.target.value)" />
                         of
                         <span class="span_text" id="quanly_page-count"></span>
@@ -155,8 +156,9 @@
                 render += `<tr id="row-${item.id}">
                     <td>${item.id}</td>
                     <td>${item.name}</td>
-                    <td>${item.category}</td>
-                    <td>${item.desc}</td>
+                    <td>${item.author}</td>
+                    <td>${item?.category?.key || ''}</td>
+                    <td><div class="table_cell">${item.content}</div></td>
                     <td><img class="preview_img" alt="preview-${item.name}" onerror="handleImgError(event)" title="img-${item.name}" src="${item.imgSrc}" /></td>
                     <td>${item.like}</td>
                     <td>${item.view}</td>
@@ -177,6 +179,8 @@
                     const preview = parentInput.querySelector('div.wrapper_upload');
                     preview.innerHTML = `<label for="imgSrc" class="btn btn_upload" ><img src="${value[input?.name] || ''}" onerror="handleImgError(event)" alt="preview_img" /></label>
                                         <i class="remove_preview fa fa-close" onclick="removePreview(event)"></i>`
+                } else if (input?.name === 'category') {
+                    input.value = value[input?.name]?.value || ""
                 } else {
                     input.value = (value[input?.name || ''] || '')
                 }
@@ -198,13 +202,8 @@
 
         function deleteItem(e, item) {
             let form = document.getElementById('formModal');
-            const lists = Array.from(form.elements || [])
             const buttonSubmit = form.querySelector('button[type=submit]')
-            lists.map(ele => {
-                if (ele.type !== 'file') {
-                    ele.value = item[ele?.name || ''] || 'action'
-                }
-            })
+            bindFormValue(form,item)
             if (item.id) {
                 if (confirm('Bạn muốn xóa sách có id: ' + item.id + '?')) {
                     form.target = 'delete'

@@ -58,6 +58,12 @@ td {
     max-height: 150px;
 }
 
-.pagination_page{
+.table_cell {
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+}
+
+.pagination_page {
     width: 50px;
 }

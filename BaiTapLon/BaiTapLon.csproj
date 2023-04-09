@@ -113,6 +113,7 @@
     <Content Include="style\Header.css" />
     <Content Include="style\HomePage.css" />
     <Content Include="style\ModalQuanLy.css" />
+    <Content Include="style\PaginationStyle.css" />
     <Content Include="style\QuanLy.css" />
     <Content Include="style\UserAccount.css" />
     <Content Include="style\UserInfo.css" />

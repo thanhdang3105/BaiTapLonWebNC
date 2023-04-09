@@ -97,7 +97,7 @@ namespace BaiTapLon.server
 
             while (reader.Read())
             {
-                ClassSach item = new ClassSach((int)reader["ID"], reader["name"].ToString(), reader["category"].ToString(), reader["description"].ToString(), reader["imgSrc"].ToString(), (int)reader["like"], (int)reader["view"]);
+                ClassSach item = new ClassSach((int)reader["ID"], reader["name"].ToString(), reader["author"].ToString(), reader["categoryName"].ToString(), reader["categoryKey"].ToString(), reader["content"].ToString(), reader["imgSrc"].ToString(), (int)reader["like"], (int)reader["view"]);
                 lists.Add(item);
             }
             string data = JsonConvert.SerializeObject(lists);
@@ -121,7 +121,7 @@ namespace BaiTapLon.server
 
             while (reader.Read())
             {
-                ClassSach item = new ClassSach((int)reader["ID"], reader["name"].ToString(), reader["category"].ToString(), reader["description"].ToString(), reader["imgSrc"].ToString(), (int)reader["like"], (int)reader["view"]);
+                ClassSach item = new ClassSach((int)reader["ID"], reader["name"].ToString(), reader["author"].ToString(), reader["categoryName"].ToString(), reader["categoryKey"].ToString(), reader["content"].ToString(), reader["imgSrc"].ToString(), (int)reader["like"], (int)reader["view"]);
                 lists.Add(item);
             }
 
@@ -146,7 +146,7 @@ namespace BaiTapLon.server
 
             while (reader.Read())
             {
-                ClassSach item = new ClassSach((int)reader["ID"], reader["name"].ToString(), reader["category"].ToString(), reader["description"].ToString(), reader["imgSrc"].ToString(), (int)reader["like"], (int)reader["view"]);
+                ClassSach item = new ClassSach((int)reader["ID"], reader["name"].ToString(), reader["author"].ToString(), reader["categoryName"].ToString(), reader["categoryKey"].ToString(), reader["content"].ToString(), reader["imgSrc"].ToString(), (int)reader["like"], (int)reader["view"]);
                 lists.Add(item);
             }
 

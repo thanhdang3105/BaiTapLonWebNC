@@ -88,9 +88,7 @@ namespace BaiTapLon.server
                 order = sort;
             }
 
-            string filter = "name like N'%" + search + "%' OR category like N'%" + search + "%'";
-
-            SqlCommand cmd = procedure.selectBooksWithFilter(filter, order,limit,skip);
+            SqlCommand cmd = procedure.selectBooksWithSearch(search, order,limit,skip);
 
             SqlDataReader reader = cmd.ExecuteReader();
 
@@ -98,7 +96,7 @@ namespace BaiTapLon.server
 
             while (reader.Read())
             {
-                ClassSach item = new ClassSach((int)reader["ID"], reader["name"].ToString(), reader["category"].ToString(), reader["description"].ToString(), reader["imgSrc"].ToString(), (int)reader["like"], (int)reader["view"]);
+                ClassSach item = new ClassSach((int)reader["ID"], reader["name"].ToString(), reader["author"].ToString(), reader["categoryName"].ToString(), reader["categoryKey"].ToString(), reader["content"].ToString(), reader["imgSrc"].ToString(), (int)reader["like"], (int)reader["view"]);
                 lists.Add(item);
             }
 
@@ -108,7 +106,7 @@ namespace BaiTapLon.server
 
             reader.Close();
 
-            cmd = procedure.countBooksWithFilter(filter);
+            cmd = new SqlCommand("SELECT COUNT(ID) AS count FROM Books WHERE [name] LIKE N'%"+ search + "%' OR author LIKE N'%" + search + "%' OR [category] LIKE N'%"+ search + "%'",con);
 
             object count = cmd.ExecuteScalar();
 
@@ -117,7 +115,7 @@ namespace BaiTapLon.server
 
         protected string getSachWithCategory(string category, int limit = 20, int skip = 0, string sort = null)
         {
-            string where = "category = '" + category + "'";
+            string where = "{\"category\": \"" + category + "\"}";
             string order = "ID DESC";
             if (category == "")
             {
@@ -136,7 +134,7 @@ namespace BaiTapLon.server
 
             while (reader.Read())
             {
-                ClassSach item = new ClassSach((int)reader["ID"], reader["name"].ToString(), reader["category"].ToString(), reader["description"].ToString(), reader["imgSrc"].ToString(), (int)reader["like"], (int)reader["view"]);
+                ClassSach item = new ClassSach((int)reader["ID"], reader["name"].ToString(), reader["author"].ToString(), reader["categoryName"].ToString(), reader["categoryKey"].ToString(), reader["content"].ToString(), reader["imgSrc"].ToString(), (int)reader["like"], (int)reader["view"]);
                 lists.Add(item);
             }
 

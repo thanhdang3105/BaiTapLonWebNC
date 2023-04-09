@@ -24,7 +24,7 @@
 }
 
 .box_content > .title {
-    margin: 10px 0;
+    margin: 20px 0;
 }
 
 .box_content > .content_list{
@@ -75,14 +75,10 @@
             text-align: center;
         }
 
-.content_list > .item_list > .item_info > .item_info-desc {
-    height: 40px;   
-    display: -webkit-box;
-    -webkit-box-orient: vertical;
-    -webkit-line-clamp: 2;
-    line-height: 20px;
-    overflow: hidden;
-}
+        .content_list > .item_list > .item_info > .item_info-desc {
+            max-width: 100%;
+            text-overflow: ellipsis;
+        }
 
         .content_list > .item_list > .item_info > .item_info-rate {
             display: flex;

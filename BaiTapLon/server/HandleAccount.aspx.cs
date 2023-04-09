@@ -452,7 +452,9 @@ namespace BaiTapLon.server
                         cmd = procedure.updateAuthPassword((int)result, auth.textEncrypted);
 
                         cmd.ExecuteNonQuery();
-                        Response.Write("Password is update success!");
+                        string token = auth.generateToken(email, auth.textEncrypted);
+                        Session["Authorization"] = token;
+                        Response.Write("{\"data\": {\"token\": \""+ token + "\", \"msg\": \"Password is update success!\"}}");
                         cmd.Cancel();
                     }
                     else

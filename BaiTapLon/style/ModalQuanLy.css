@@ -50,7 +50,7 @@
 
     .modalForm .wrapper_input > textarea {
         padding: 5px;
-        min-height: 80px;
+        min-height: 200px;
     }
 
     .modalForm .wrapper_input > .error_info {

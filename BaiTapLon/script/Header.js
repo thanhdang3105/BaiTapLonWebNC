@@ -217,11 +217,13 @@ const handleSearch = async (value) => {
             a.innerHTML = `
                 <li class="menu_item">
                     <div class="item_img">
-                        <img src="https://th.bing.com/th/id/R.02fb9d33fe6274db44d306962b180e8a?rik=%2bsNFNzVh3jxgCQ&riu=http%3a%2f%2fi.desi.vn%2fl%2f2016%2f03%2f34%2f1.png&ehk=paVdyF1tqTwthbQqPtE0gQORb5CLd%2b61NnkeGgCdgz4%3d&risl=&pid=ImgRaw&r=0" title="logo" alt="logo" />
+                        <img src="${data[i].imgSrc}" title="logo" alt="logo" />
                     </div>
                     <div class="item_info">
                         <strong>${data[i].name}</strong>
-                        <span>${header.category[data[i].category]}</span>
+                        <span>${data[i].category.key}</span>
+                        <br/>
+                        <span>${data[i].author}</span>
                     </div>
                 </li>
             `

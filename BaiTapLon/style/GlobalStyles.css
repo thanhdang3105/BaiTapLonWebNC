@@ -159,3 +159,7 @@ div.wrapper_loading > i {
 input[type=checkbox], input[type=radio] {
     cursor: pointer;
 }
+
+select.select_sort{
+    padding: 5px;
+}

@@ -194,7 +194,7 @@ namespace BaiTapLon.admin
 
                 while (reader.Read())
                 {
-                    ClassSach sach = new ClassSach(Convert.ToInt32(reader["ID"]), reader["name"].ToString(), reader["category"].ToString(), reader["description"].ToString(), reader["imgSrc"].ToString(), Convert.ToInt32(reader["like"]), Convert.ToInt32(reader["view"]));
+                    ClassSach sach = new ClassSach(Convert.ToInt32(reader["ID"]), reader["name"].ToString(), reader["author"].ToString(), reader["categoryName"].ToString(), reader["categoryKey"].ToString(), reader["content"].ToString(), reader["imgSrc"].ToString(), Convert.ToInt32(reader["like"]), Convert.ToInt32(reader["view"]));
                     lists.Add(sach);
                 }
 
@@ -289,15 +289,16 @@ namespace BaiTapLon.admin
         {
             Response.ContentType = "application/json";
             string name = form["name"];
+            string author = form["author"];
             string category = form["category"];
-            string desc = form["desc"];
+            string content = form["content"];
             string imgSrc = form["imgSrc"];
             if(String.IsNullOrEmpty(name) || String.IsNullOrEmpty(category)){
                 Response.StatusCode = 400;
                 Response.Write("{\"msg\":\"Invalid Params!\"}");
             }else
             {
-                SqlCommand cmd = procedure.insertBookInfo(name,category, desc, imgSrc); 
+                SqlCommand cmd = procedure.insertBookInfo(name, author, category, content, imgSrc); 
                 try
                 {
                     if (cmd == null) throw new Exception("System Error!");
@@ -321,8 +322,9 @@ namespace BaiTapLon.admin
             Response.ContentType = "application/json";
             string id = form["id"];
             string name = form["name"];
+            string author = form["author"];
             string category = form["category"];
-            string desc = form["desc"];
+            string content = form["content"];
             string imgSrc = form["imgSrc"];
             if (String.IsNullOrEmpty(id) || String.IsNullOrEmpty(name) || String.IsNullOrEmpty(category))
             {
@@ -331,7 +333,7 @@ namespace BaiTapLon.admin
             }
             else
             {
-                SqlCommand cmd = procedure.updateBookInfo(Convert.ToInt32(id),name,category,desc,imgSrc);
+                SqlCommand cmd = procedure.updateBookInfo(Convert.ToInt32(id),name, author,category, content, imgSrc);
                 try
                 {
 

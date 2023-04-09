@@ -73,12 +73,8 @@
     }
 
 .content_list > .item_list > .item_info > .item_info-desc {
-    height: 40px;   
-    display: -webkit-box;
-    -webkit-box-orient: vertical;
-    -webkit-line-clamp: 2;
-    line-height: 20px;
-    overflow: hidden;
+    max-width: 100%;
+    text-overflow: ellipsis; 
 }
 
 .content_list > .item_list > .item_info > .item_info-rate {

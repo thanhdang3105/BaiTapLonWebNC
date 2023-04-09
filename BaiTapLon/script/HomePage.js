@@ -19,7 +19,8 @@ async function getData() {
                        </a>
                         <div class="item_info">
                             <a href="/view/DetailPage.html" class="item_info-name text_link">${item.name}</a>
-                            <span class="item_info-desc">${item.desc.toString()}</span>
+                            <span class="item_info-desc span_text">${item.author}</span>
+                            <span class="item_info-desc">${item.category.key}</span>
                             <div class="item_info-rate">
                                 <span class="info_rate-like span_text">${item.like} <i class="fa fa-heart"></i></span>
                                 <span class="info_rate-view span_text">${item.view} <i class="fa fa-eye"></i></span>
