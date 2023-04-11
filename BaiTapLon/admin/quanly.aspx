@@ -111,7 +111,6 @@
             if (modal) {
                 modal.classList.add('show')
                 form.target = 'create'
-                
             }
         }
 
@@ -149,7 +148,7 @@
             data?.map(item => {
                 let JSONItem
                 try {
-                    JSONItem = JSON.stringify(item).replaceAll("\"", "'");
+                    JSONItem = JSON.stringify(item);
                 } catch (e) {
                     JSONItem = item.toString()
                 }
@@ -162,7 +161,7 @@
                     <td><img class="preview_img" alt="preview-${item.name}" onerror="handleImgError(event)" title="img-${item.name}" src="${item.imgSrc}" /></td>
                     <td>${item.like}</td>
                     <td>${item.view}</td>
-                    <td class='action_column'><i class='fa fa-edit' onclick="updateItem(event,${JSONItem})"></i><i class='fa fa-trash' onclick="deleteItem(event,${JSONItem})"></i></td>
+                    <td class='action_column'><i class='fa fa-edit' onclick='updateItem(event,${JSONItem})'></i><i class='fa fa-trash' onclick='eleteItem(event,${JSONItem})'></i></td>
                 </tr>`
             })
             document.querySelector('#tableSach tbody').innerHTML = render

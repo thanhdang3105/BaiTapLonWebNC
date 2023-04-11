@@ -1,6 +1,5 @@
 ﻿.wrapper_modal {
     display: none;
-    align-items: center;
     justify-content: center;
     position: fixed;
     top: 0;
@@ -9,6 +8,7 @@
     right: 0;
     background-color: var(--shadow-color);
     backdrop-filter: blur(5px);
+    overflow: auto;
 }
 
     .wrapper_modal.show {

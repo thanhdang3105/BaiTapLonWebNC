@@ -41,7 +41,7 @@ async function getUserInfo() {
 
     if (userInfo) {
         const form = document.createElement('form')
-        form.action = "/server/HandleAccount.aspx"
+        form.action = "/server/HandleUserInfo.aspx"
         form.method = "post"
         form.className = "form_userInfo"
         form.onsubmit = (event) => handleSubmitForm(event)
@@ -94,7 +94,7 @@ async function getUserInfo() {
                         <button type="submit" class="btn">Submit</button>
                     </div>`
         const form2 = document.createElement('form')
-        form2.action = "/server/HandleAccount.aspx"
+        form2.action = "/server/HandleUserInfo.aspx"
         form2.method = "post"
         form2.className = "form_userInfo"
         form2.onsubmit = async (event) => {
@@ -104,6 +104,7 @@ async function getUserInfo() {
             }
         }
         form2.innerHTML = `<h1 class="body_header-title">Đổi mật khẩu</h1>
+                    <input type="text" hidden name="id" />
                     <input type="email" hidden name="email" />
                     <label for="oldPassword">Mật khẩu cũ:</label>
                     <div class="input_wrapper">
@@ -244,6 +245,10 @@ async function handleSubmitForm(event) {
     if (!formData.get('email')) {
         formData.set('email', userInfo["email"])
     }
+    if (!formData.get('id')) {
+        formData.set('id', userInfo["id"])
+    }
+
 
     const checkErr = checkValue(formData,form)
 
@@ -259,7 +264,7 @@ async function handleSubmitForm(event) {
 
     unLoading()
 
-    if (res.status === 200) { 
+    if (res.status === 200) {
         Object.keys(userInfo).map(item => {
             if (formData.get(item)) {
                 userInfo[item] = formData.get(item)
@@ -277,8 +282,10 @@ async function handleSubmitForm(event) {
             sessionStorage.setItem('userInfo', userInfo)
         }
         return true
+    } else if (res.status === 401) {
+        return false
     } else {
-        alert(res.msg)
+        alert(res.data)
         return false
     }
 }
@@ -307,7 +314,7 @@ async function getUserRead() {
     params.set('limit',limit)
 
     loading()
-    const res = await request('/admin/quanly.aspx/getData?' + params.toString(),null,"GET")
+    const res = await request('/server/HandleUserInfo.aspx?action=getUserReadBook&' + params.toString(),null,"GET")
     unLoading()
 
     const div = document.createElement('div')
@@ -331,11 +338,12 @@ async function getUserRead() {
                     </div>
                     <ul class="body_content-list">
                         ${Array.isArray(res.data) && res.data.map(item => `<li class="item_list">
-                            <a href="/view/DetailPage.html" class="item_list-img">
+                            <span class="time_badge">${ConvertDate(item.updatedAt)}</span>
+                            <a href="/view/ReadingPage.aspx?id=${item.id}" class="item_list-img">
                                 <img src="${item.imgSrc}" onerror="handleImgError(event)" title="img-${item.name}" alt="img-${item.name}" />
                             </a>
                             <div class="item_info">
-                                <a href="/view/DetailPage.html" class="item_info-name text_link">${item.name}</a>
+                                <a href="/view/ReadingPage.aspx?id=${item.id}" class="item_info-name text_link">${item.name}</a>
                                 <span class="item_info-desc span_text">${item.author}</span>
                                 <span class="item_info-desc">${item.category.key}</span>
                                 <div class="item_info-rate">
@@ -368,6 +376,19 @@ async function getUserRead() {
         limit
     }
     return div
+}
+
+function ConvertDate(date) {
+    const ms = Date.now() - new Date(date)
+    const hour = (ms / 1000 / 60 / 60) - 7 
+
+    if (hour < 1) {
+        return Math.ceil(hour * 60) + ' Phút trước'
+    } else if (hour > 24) {
+        return new Date(date).toDateString()
+    } else {
+        return Math.ceil(hour) + ' Giờ trước'
+    }
 }
 
 async function handleChangeSort(event,id) {
@@ -425,7 +446,7 @@ async function getUserLike() {
     params.set('limit', limit)
 
     loading()
-    const res = await request('/admin/quanly.aspx/getData?' + params.toString(), null, "GET")
+    const res = await request('/server/HandleUserInfo.aspx?action=getUserLikeBook&' + params.toString(), null, "GET")
     unLoading()
 
     const div = document.createElement('div')

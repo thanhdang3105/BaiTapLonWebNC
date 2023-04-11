@@ -182,7 +182,7 @@ namespace BaiTapLon.admin
 
                 SqlCommand cmd1 = procedure.countBooksWithFilter(filter);
 
-                SqlCommand cmd = procedure.selectBooksWithFilter(filter, sort, limit, skip * limit);
+                SqlCommand cmd = procedure.selectBooksWithFilter(filter, sort, limit, skip);
 
                 if (cmd == null || cmd1 == null) throw new Exception("System Error!");
 

@@ -4,13 +4,14 @@
 
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head runat="server">
-    <title>Reading</title>
+    <title>Reading Page</title>
     <meta charset="utf-8" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.3.0/css/all.min.css" integrity="sha512-SzlrxWUlpfuzQ+pcUCosxcglQRNAq/DZjVsC0lE40xsADsfeQoEypE+enwcOiGjk/bSuGGKHEyjSoQ1zVisanQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link href="../style/GlobalStyles.css" rel="stylesheet" />
     <link href="../style/Header.css" rel="stylesheet" />
-    <link href="../style/DetailPage.css" rel="stylesheet" />
+    <link href="../style/ReadingPage.css" rel="stylesheet" />
     <link href="../style/Footer.css" rel="stylesheet" />
+    <script src="../script/request.js" defer></script>
     <script src="../script/Header.js" defer></script>
     <script src="../script/loading.js" defer></script>
 </head>
@@ -20,17 +21,19 @@
         <header class="header_container">
         </header>
         <div class="storyContent">
-            <nav class="breadcrumbs">
-                <ul>
-                    <li><a href="/"><i class="fa fa-home"></i></a></li>
-                    <li><asp:Literal runat="server" id="Literal1"></asp:Literal></li>
-                    <li><asp:Literal runat="server" id="Literal2"></asp:Literal></li>
+            <nav class="nav_control">
+                <ul class="breadcrumbs">
+                    <li><a href="/view/HomePage.html"><i class="fa fa-home"></i></a></li>
+                    <li><asp:Literal runat="server" id="category"></asp:Literal></li>
+                    <li><asp:Literal runat="server" id="breadBookName"></asp:Literal></li>
                 </ul>
+                <asp:Literal runat="server" id="btnLike"></asp:Literal>
             </nav>
-            <h1><asp:Literal runat="server" ID="Literal3"></asp:Literal></h1>
-            <span class="span_text"><asp:Literal runat="server" ID="Literal4">Tác Giả</asp:Literal></span>
-            <br />
-            <asp:Literal runat="server" id="storyContent"></asp:Literal>
+            <h1 class="title"><asp:Literal runat="server" ID="bookName"></asp:Literal></h1>
+            <span class="span_text"><asp:Literal runat="server" ID="author"></asp:Literal></span>
+            <div class="storyContent_body">
+                <asp:Literal runat="server" id="storyContent"></asp:Literal>
+            </div>
         </div>
         <footer class="footer_container">
             <div class="footer_content">
@@ -50,5 +53,42 @@
         </footer>
     </div>
 </form>
+    <script>
+        window.addEventListener("DOMContentLoaded", () => {
+            handleAction(null, "view")
+        })
+        function handleAction(e,action) {
+            const button = e?.target
+            const icon = button?.querySelector('i.fa')
+            const formData = new FormData()
+            formData.set('action', action)
+            button && loading(button)
+            request("", formData).then(res => {
+                if (res.status === 200) {
+                    if (action === "like") {
+                        button.className = button.className.replace("like", "unlike")
+                        icon.classList.replace("fa-heart", "fa-heart-crack")
+                        button.childNodes[1].textContent = "Bỏ thích"
+                        button.onclick = (event) => handleAction(event, "unlike")
+                    } else if (action === "unlike") {
+                        button.className = button.className.replace("unlike", "like")
+                        icon.classList.replace("fa-heart-crack", "fa-heart")
+                        button.childNodes[1].textContent = "Thích"
+                        button.onclick = (event) => handleAction(event, "like")
+                    }
+                } 
+                button && unLoading(button)
+            }).catch(res => {
+                if (res.status === 401) {
+                    alert(res.data)
+                    window.navigation.navigate('/view/UserAccount.html?redirect=true')
+                } else {
+                    alert("Đẫ xảy ra lỗi vui lòng thử lại sau!")
+
+                }
+                button && unLoading(button)
+            })
+        }
+    </script>
 </body>
 </html>

@@ -44,8 +44,6 @@ namespace BaiTapLon.server
                 Response.Write("{\"msg\": \""+ex.Message.ToString()+"\" }");
                 Response.End();
             }
-                object test = ViewState["thanh@gmail.com"];
-
 
                 string action = Request.QueryString["action"];
                 switch (action)
@@ -68,8 +66,8 @@ namespace BaiTapLon.server
                         forgotPassword(Request);
                         Response.End();
                         break;
-                    case "updateUser":
-                        updateUser(Request.Form);
+                    case "logout":
+                        Session["Authorization"] = null;
                         Response.End();
                         break;
                     default:
@@ -189,7 +187,7 @@ namespace BaiTapLon.server
                 }                           
                 else if (username != null && password != null)
                 {
-
+                    Session["CountLoginFail"] = 0;
                     Authorization BasicAuth = new Authorization(password);
 
                     SqlCommand cmd = procedure.selectAuthWithEmail(username, BasicAuth.textEncrypted);
@@ -434,85 +432,6 @@ namespace BaiTapLon.server
                 Response.End();
             }
             
-        }
-
-        protected void updateUser(NameValueCollection form)
-        {
-            ErrorResponse errMsg;
-            try
-            {
-                string id = form["id"];
-                string name = form["name"];
-                string email = form["email"];
-                string birthday = form["birthday"];
-                string phone = form["phone"];
-                string sex = form["sex"];
-                string oldPassword = form["oldPassword"];
-                string newPassword = form["newPassword"];
-
-                SqlCommand cmd;
-                if (!String.IsNullOrEmpty(oldPassword) && !String.IsNullOrEmpty(newPassword) && !String.IsNullOrEmpty(email))
-                {
-                    Authorization auth = new Authorization(oldPassword);
-                    cmd = procedure.selectAuthWithEmail(email, auth.textEncrypted);
-                    if (cmd == null)
-                    {
-                        throw new Exception("System Error!");
-                    }
-                    object result = cmd.ExecuteScalar();
-                    cmd.Cancel();
-
-                    if (result != null)
-                    {
-                        auth = new Authorization(newPassword);
-                        cmd = procedure.updateAuthPassword((int)result, auth.textEncrypted);
-
-                        cmd.ExecuteNonQuery();
-                        string token = auth.generateToken(email, auth.textEncrypted);
-                        Session["Authorization"] = token;
-                        Response.Write("{\"data\": {\"token\": \""+ token + "\", \"msg\": \"Password is update success!\"}}");
-                        cmd.Cancel();
-                    }
-                    else
-                    {
-                        Response.StatusCode = 400;
-                        errMsg = new ErrorResponse("Password is update failed!");
-                        Response.Write(JsonConvert.SerializeObject(errMsg));
-                    }
-                }else
-                {
-                    if(String.IsNullOrEmpty(id) || Convert.ToInt32(id) == 0 || String.IsNullOrEmpty(name) || String.IsNullOrEmpty(birthday) || String.IsNullOrEmpty(phone) || String.IsNullOrEmpty(sex))
-                    {
-                        Response.StatusCode = 400;
-                        errMsg = new ErrorResponse("Invalid Params!");
-                        Response.Write(JsonConvert.SerializeObject(errMsg));
-                    }else
-                    {
-                        cmd = procedure.updateUserInfo(Convert.ToInt32(id),name,birthday,phone,sex);
-
-                        if (cmd == null) throw new Exception("System Error!");
-
-                        object result = cmd.ExecuteScalar();
-                        cmd.Cancel();
-                        if(result != null)
-                        {
-                            Response.Write("Update succes!");
-                        }else
-                        {
-                            Response.StatusCode = 400;
-                            errMsg = new ErrorResponse("Update failed!");
-                            Response.Write(JsonConvert.SerializeObject(errMsg));
-                        }
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                errMsg = new ErrorResponse(ex.Message);
-                Response.StatusCode = 500;
-                Response.Write(JsonConvert.SerializeObject(errMsg));
-            }
-            Response.End();
         }
 
         protected string sendEmail(string sendTo, string otp = null)

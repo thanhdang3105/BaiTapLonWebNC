@@ -95,6 +95,7 @@
     <Content Include="images\logo.jpg" />
     <Content Include="images\OIP.jpg" />
     <Content Include="images\signup.jpg" />
+    <Content Include="server\HandleUserInfo.aspx" />
     <Content Include="style\ReadingPage.css" />
     <Content Include="view\ReadingPage.aspx" />
     <Content Include="script\AdminAccount.js" />
@@ -143,6 +144,13 @@
     <Compile Include="class\GlobalClass.cs" />
     <Compile Include="class\SexFormat.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="server\HandleUserInfo.aspx.cs">
+      <DependentUpon>HandleUserInfo.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="server\HandleUserInfo.aspx.designer.cs">
+      <DependentUpon>HandleUserInfo.aspx</DependentUpon>
+    </Compile>
     <Compile Include="view\ReadingPage.aspx.cs">
       <DependentUpon>ReadingPage.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>

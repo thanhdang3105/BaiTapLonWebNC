@@ -14,7 +14,7 @@ async function getData() {
             data[key].map(item => {
                 const li = document.createElement('li');
                 li.className = "item_list";
-                 li.innerHTML = `<a href="/view/DetailPage.html" class="item_img">
+                li.innerHTML = `<a href="/view/ReadingPage.aspx?id=${item.id}" class="item_img">
                             <img src="${item.imgSrc}" onerror="handleImgError(event)"  title="img-${item.name}" alt="img-${item.name}" />
                        </a>
                         <div class="item_info">

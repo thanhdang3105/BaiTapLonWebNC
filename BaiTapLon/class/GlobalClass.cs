@@ -565,6 +565,51 @@ namespace BaiTapLon.server {
 
             return cmd;
         }
+
+        public SqlCommand insertHistoryActionWithBook(int userID, int bookID, string action = "view")
+        {
+
+            if(userID < 1 || bookID < 1 ) return null;
+
+            SqlCommand cmd = new SqlCommand("InsertHistoryActionWithBook", conn);
+            cmd.CommandType = CommandType.StoredProcedure;
+
+            cmd.Parameters.Add(new SqlParameter("@UserID", userID));
+            cmd.Parameters.Add(new SqlParameter("@BookID", bookID));
+            cmd.Parameters.Add(new SqlParameter("@Action", action));
+            
+            return cmd;
+        }
+
+        public SqlCommand updateHistoryActionWithBook(int id, string action)
+        {
+            if (id < 1 || String.IsNullOrEmpty(action)) return null;
+
+            SqlCommand cmd = new SqlCommand("UpdateHistoryActionWithBook", conn);
+            cmd.CommandType = CommandType.StoredProcedure;
+
+            cmd.Parameters.Add(new SqlParameter("@ID", id));
+            cmd.Parameters.Add(new SqlParameter("@Action",action));
+
+            return cmd;
+        }
+
+        public SqlCommand selectHistoryActionWithBook(int id = 0, int userID = 0, int bookID = 0, string action = "", string sort = "ID DESC", int limit = 10, int skip = 0)
+        {
+            if(id < 0 && userID <0) return null;
+            SqlCommand cmd = new SqlCommand("SelectHistoryActionWithBook", conn);
+            cmd.CommandType = CommandType.StoredProcedure;
+
+            cmd.Parameters.Add(new SqlParameter("@ID", id));
+            cmd.Parameters.Add(new SqlParameter("@UserID", userID));
+            cmd.Parameters.Add(new SqlParameter("@BookID", bookID));
+            cmd.Parameters.Add(new SqlParameter("@Action", action));
+            cmd.Parameters.Add(new SqlParameter("@Sort", sort));
+            cmd.Parameters.Add(new SqlParameter("@Limit", limit));
+            cmd.Parameters.Add(new SqlParameter("@Skip", skip));
+
+            return cmd;
+        }
     }
 
 }

@@ -1,5 +1,6 @@
 ﻿function request(url, body, method = "POST") {
-    return new Promise((resolve) => {
+
+    const promise = new Promise((resolve) => {
         let xmlhttp = new XMLHttpRequest();
         xmlhttp.onreadystatechange = function () {
             if (this.readyState == 4) {
@@ -41,11 +42,15 @@
             }
 
         };
+
         xmlhttp.open(method, url, true);
+
         const token = localStorage.getItem('tokenWebSach')
         if (token) {
-            xmlhttp.setRequestHeader("Authorization",token)
+            xmlhttp.setRequestHeader("Authorization", token)
         }
         xmlhttp.send(body);
     })
+
+    return promise
 }

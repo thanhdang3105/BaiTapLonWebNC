@@ -14,12 +14,7 @@
                     <button class="header_btn-search btn_icon" onclick="handleClickSearch(event)" type="button" title="Search"><i class="fa fa-search"></i></button>
                 </div>
                 <div id="userInfo_header" class="header_account">
-                    <div class="wrapper_menu">
-                        <button class="btn_icon" type="button" title="Notifications"><i class="fa-regular fa-comment"></i></button>
-                        <ul class="header_notification">
-                            <li class="menu_item">No Notifications</li>
-                        </ul>
-                    </div>
+                    
                     <div class="wrapper_menu">
                         <button class="btn_icon" type="button" title="User"><i class="fa-regular fa-user"></i></button>
                         <ul class="header_menuAccount">
@@ -28,6 +23,13 @@
                 </div>
             </div>`
 
+/* header noti
+<div class="wrapper_menu">
+    <button class="btn_icon" type="button" title="Notifications"><i class="fa-regular fa-comment"></i></button>
+    <ul class="header_notification">
+        <li class="menu_item">No Notifications</li>
+    </ul>
+</div>*/
 window.addEventListener("DOMContentLoaded", async () => {
     const header = document.querySelector('header.header_container');
 
@@ -98,8 +100,8 @@ async function checkUserLogin() {
     const headerUser = document.querySelector("div#userInfo_header");
     const menuAccount = headerUser.querySelector("ul.header_menuAccount");
     const iconUser = menuAccount.previousElementSibling.firstElementChild
-    const menuNoti = headerUser.querySelector("ul.header_notification")
-    const iconNoti = menuNoti.previousElementSibling.firstElementChild
+    /*const menuNoti = headerUser.querySelector("ul.header_notification")
+    const iconNoti = menuNoti.previousElementSibling.firstElementChild*/
     let el = `${itemMenu({ href: "/view/UserAccount.html", label: "Đăng nhập" })}
             ${itemMenu({ href: "/view/UserAccount.html?action=register", label: "Đăng kí" })}`
     menuAccount.innerHTML = el
@@ -119,7 +121,7 @@ async function checkUserLogin() {
                 sessionStorage.setItem("userInfo", JSON.stringify(res.data))
                 iconUser.classList.remove("fa-regular");
                 iconUser.classList.add("fa");
-                el = `${itemMenu({ href: "/view/UserAccount.html", label: res.data.name })}
+                el = `${itemMenu({ href: "/view/UserInfo.html", label: res.data.name })}
                       ${itemMenu({ label: "Đăng xuất", onClick: logout })}`
             } else if (res.status === 400 && res.data === "Token expired!") {
                 localStorage.removeItem("tokenWebSach");
@@ -133,6 +135,7 @@ function logout() {
     sessionStorage.removeItem("userInfo");
     localStorage.removeItem("tokenWebSach");
     checkUserLogin();
+    window.navigator.sendBeacon("/server/HandleAccount.aspx?action=logout")
 }
 
 
@@ -227,6 +230,7 @@ const handleSearch = async (value) => {
                     </div>
                 </li>
             `
+            a.href = `/view/ReadingPage.aspx?id=${data[i].id}`
             list.prepend(a)
         }
     }

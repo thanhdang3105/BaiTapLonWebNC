@@ -1,3 +1,56 @@
-﻿storyContent{
-    align-content:center
+﻿.storyContent {
+    margin: 15px 0;
+    padding: 0 15%;
+}
+
+.nav_control{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.breadcrumbs {
+    margin: 20px 0;
+}
+
+.breadcrumbs {
+    display: flex;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.breadcrumbs li:not(:last-child)::after {
+    content: ">";
+    margin: 0 5px;
+}
+
+.breadcrumbs li a {
+    color: #333;
+    text-decoration: none;
+}
+
+.breadcrumbs li a:hover {
+    text-decoration: underline;
+}
+
+.title{
+    display: block;
+    text-align: center;
+}
+
+.span_text{
+    display: block;
+    text-align: center;
+}
+
+.storyContent_body {
+    width: 100%;
+    font-size: 18px;
+    line-height: 1.5;
+    white-space: pre-line;
+}
+
+.btn_like > i{
+    color: red;
 }

@@ -67,6 +67,9 @@ namespace BaiTapLon.server
             if (column == null || value == null || value == "")
             {
                 where = "";
+            }else if(column == "category")
+            {
+                where = column + " = '" + value + "'";
             }
             SqlCommand cmd = procedure.countBooksWithFilter(where);
 
@@ -116,14 +119,9 @@ namespace BaiTapLon.server
         protected string getSachWithCategory(string category, int limit = 20, int skip = 0, string sort = null)
         {
             string where = "{\"category\": \"" + category + "\"}";
-            string order = "ID DESC";
             if (category == "")
             {
                 where = "";
-            }
-            if (!String.IsNullOrEmpty(sort))
-            {
-                order = sort;
             }
 
             SqlCommand cmd = procedure.selectBooksWithFilter(where, sort, limit, skip);

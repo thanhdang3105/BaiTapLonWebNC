@@ -1,5 +1,7 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
+using System.Data.SqlTypes;
 using System.Linq;
 using System.Web;
 
@@ -17,7 +19,10 @@ namespace BaiTapLon.server
         public int like { get; set; }
 
         public int view { get; set;}
-
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+        public DateTime? createdAt { get; set; }
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+        public DateTime? updatedAt { get; set; }
         public ClassSach(int id, string Name, string Author, string CategoryName, string CategoryKey, string Content, string src, int LIKE, int View)
         {
             this.id = id;
@@ -28,6 +33,19 @@ namespace BaiTapLon.server
             this.imgSrc = src;
             this.like = LIKE;
             this.view = View;
+        }
+        public ClassSach(int id, string Name, string Author, string CategoryName, string CategoryKey, string Content, string src, int LIKE, int View, DateTime createdAt, DateTime updatedAt)
+        {
+            this.id = id;
+            this.name = Name;
+            this.author = Author;
+            this.category = new CategoryClass(CategoryName, CategoryKey);
+            this.content = Content;
+            this.imgSrc = src;
+            this.like = LIKE;
+            this.view = View;
+            this.createdAt = createdAt;
+            this.updatedAt = updatedAt;
         }
     }
 

@@ -1,7 +1,9 @@
 ﻿
 function loading(wrapper = document.body) {
-    wrapper.style.overflow = 'hidden'
-    wrapper.style.position = 'relative'
+    if (wrapper.style) {
+        wrapper.style.overflow = 'hidden'
+        wrapper.style.position = 'relative'
+    }
     const check = wrapper.querySelector('div.wrapper_loading')
     if (check) return
     const div = document.createElement('div')
@@ -11,7 +13,9 @@ function loading(wrapper = document.body) {
 }
 
 function unLoading(wrapper = document.body) {
-    wrapper.style.overflow = 'unset'
+    if (wrapper.style) {
+        wrapper.style.overflow = 'unset'
+    }
     const div = document.querySelector('div.wrapper_loading')
     div && wrapper.removeChild(div)
 }
