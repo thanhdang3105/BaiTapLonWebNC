@@ -310,7 +310,7 @@ async function getUserRead() {
 
     const params = new URLSearchParams()
     params.set('sort', sort)
-    params.set("skip", page - 1)
+    params.set("skip", (page - 1) * limit)
     params.set('limit',limit)
 
     loading()
@@ -356,7 +356,7 @@ async function getUserRead() {
                     <div class="body_footer-control">
                         <ul class="pagination_box">
                             ${pageCount.map((i, index) => `
-                                <li class="pagination_item ${page == i + index ? 'active' : ''}" onclick="handleChangePage(event,${i + index})">${i + index}</li>
+                                <li class="pagination_item ${page == i + index ? 'active' : ''}" onclick="handleChangePage(event,${i + index}, 'user_read')">${i + index}</li>
                             `).join(" ")}
                         </ul>
                     </div>`
@@ -385,7 +385,8 @@ function ConvertDate(date) {
     if (hour < 1) {
         return Math.ceil(hour * 60) + ' Phút trước'
     } else if (hour > 24) {
-        return new Date(date).toDateString()
+        
+        return Math.floor(hour / 24) + ' Ngày trước'
     } else {
         return Math.ceil(hour) + ' Giờ trước'
     }
@@ -409,7 +410,7 @@ async function handleChangeSort(event,id) {
 
 async function handleChangePage(e, i, id) {
     const item = e.target
-    if (item.classList.contains('active') || item.innerText == i || i < 1) {
+    if (item.classList.contains('active') || i < 1) {
         return
     } else {
         if (element[id]) {
@@ -487,7 +488,7 @@ async function getUserLike() {
                     <div class="body_footer-control">
                         <ul class="pagination_box">
                             ${pageCount.map((i, index) => `
-                                <li class="pagination_item ${page == i + index ? 'active' : ''}" onclick="handleChangePage(event,${i + index})">${i + index}</li>
+                                <li class="pagination_item ${page == i + index ? 'active' : ''}" onclick="handleChangePage(event,${i + index}, 'user_like')">${i + index}</li>
                             `).join(" ")}
                         </ul>
                     </div>`

@@ -16,10 +16,10 @@
     <script src="../script/loading.js" defer></script>
 </head>
 <body>
-<form id="form" runat="server">
     <div class="container">
         <header class="header_container">
         </header>
+        <form id="form" runat="server">
         <div class="storyContent">
             <nav class="nav_control">
                 <ul class="breadcrumbs">
@@ -35,6 +35,7 @@
                 <asp:Literal runat="server" id="storyContent"></asp:Literal>
             </div>
         </div>
+        </form>
         <footer class="footer_container">
             <div class="footer_content">
                 <div class="logo_footer">
@@ -52,7 +53,6 @@
             </div>
         </footer>
     </div>
-</form>
     <script>
         window.addEventListener("DOMContentLoaded", () => {
             handleAction(null, "view")

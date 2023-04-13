@@ -11,10 +11,10 @@ async function getData() {
     if (select) {
         select.value = query.sort || ""
     }
+    formData.set('limit', 10)
     formData.set('category', '');
     if (query.search) {
         formData.set('search', query.search)
-        formData.set('limit', 20)
         title.innerText = `Kết quả tìm kiếm của "${query.search}" : `;
     } else if (query.category) {
         formData.set('category', query.category);
@@ -36,10 +36,9 @@ async function getData() {
     const res = await request('/server/DetailPage.aspx', formData);
     
     if (res.status === 200) {
-
         const data = res.data.data;
         const count = res.data.count;
-        renderPagination(count, 20, query?.page)
+        renderPagination(count, 10, query?.page)
         title.innerHTML += " <span class='span_text'> (" + count + " đầu sách)</span>";
         if (data.length <= 0) {
             return ul.innerHTML = '<li class="item_list">Hiện chưa có sách nào!</li>'
@@ -73,7 +72,7 @@ function handleChangeSelectDetailPage(e) {
     handleSearchParams('sort',e.target.value)
 }
 
-function renderPagination(count, limit = 20, currentPage = 1) {
+function renderPagination(count, limit = 10, currentPage = 1) {
     const wrapper = document.getElementById('detailPage_pagination')
     if (!count) {
         return

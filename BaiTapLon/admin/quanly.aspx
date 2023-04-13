@@ -109,7 +109,12 @@
             let form = document.getElementById('formModal');
             const modal = form?.parentElement
             if (modal) {
+                form.reset()
                 modal.classList.add('show')
+                const title = form.querySelector('.header_modal h1')
+                const button = form.querySelector('button[type=submit]')
+                title.innerText = 'Thêm sách'
+                button.innerText = 'Tạo'
                 form.target = 'create'
             }
         }
@@ -161,7 +166,7 @@
                     <td><img class="preview_img" alt="preview-${item.name}" onerror="handleImgError(event)" title="img-${item.name}" src="${item.imgSrc}" /></td>
                     <td>${item.like}</td>
                     <td>${item.view}</td>
-                    <td class='action_column'><i class='fa fa-edit' onclick='updateItem(event,${JSONItem})'></i><i class='fa fa-trash' onclick='eleteItem(event,${JSONItem})'></i></td>
+                    <td class='action_column'><i class='fa fa-edit' onclick='updateItem(event,${JSONItem})'></i><i class='fa fa-trash' onclick='deleteItem(event,${JSONItem})'></i></td>
                 </tr>`
             })
             document.querySelector('#tableSach tbody').innerHTML = render
