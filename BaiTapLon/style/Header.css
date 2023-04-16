@@ -246,17 +246,26 @@
         overflow-y: hidden;
         justify-content: flex-start;
     }
-}
-
-@media screen and (max-width: 480px) {
-    .sub_header {
-        justify-content: flex-start;
-    }
     .wrapper_search {
         position: unset;
     }
 
     .wrapper_search > .menu_search {
         left: 0;
+    }
+
+    .menu_search .menu_item > .item_img {
+        width: 15%;
+        height: 100%;
+    }
+}
+
+@media screen and (max-width: 480px) {
+    .sub_header {
+        justify-content: flex-start;
+    }
+    .menu_search .menu_item > .item_img {
+        width: 30%;
+        height: 100%;
     }
 }

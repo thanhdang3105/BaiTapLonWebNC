@@ -3,17 +3,19 @@
 <head>
     <meta charset="utf-8" />
     <title>Account</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.3.0/css/all.min.css" integrity="sha512-SzlrxWUlpfuzQ+pcUCosxcglQRNAq/DZjVsC0lE40xsADsfeQoEypE+enwcOiGjk/bSuGGKHEyjSoQ1zVisanQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link rel="stylesheet" href="../style/GlobalStyles.css" />
     <link rel="stylesheet" href="../style/UserAccount.css" />
     <script src="../script/UserAccount.js" defer></script>
 </head>
 <body>
     <div class="wrapper">
+        <a class="text_link back_home" href="HomePage.html"><i class="fa fa-home"></i></a>
         <div class="wrapper_body">
             <div class="switch_view"></div>
             <div class="body_content">
                 <form id="register" method="post" onsubmit="submitForm(event)">
-                    <h1 class="content_header">Đăng nhập</h1>
+                    <h1 class="content_header">Đăng ký</h1>
                     <label for="fullname">Name</label>
                     <div class="wrapper_input">
                         <input name="fullname" type="text" title="Vui lòng nhập họ và tên  của bạn" placeholder="Họ và tên" required />

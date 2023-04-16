@@ -211,3 +211,26 @@
 .body_footer-control{
     margin-top: auto;
 }
+
+@media screen and (max-width: 992px) {
+    .body_content-list {
+        grid-template-columns: repeat(4, 1fr);
+    }
+    .userInfo_container:not(.collapse) .body_content-list {
+        grid-template-columns: repeat(3, 1fr);
+    }
+} 
+
+@media screen and (max-width: 768px) {
+    .userInfo_container {
+        --siderBar-width: 200px;
+    }
+
+    .body_content-list {
+        grid-template-columns: repeat(3, 1fr);
+    }
+
+    .userInfo_container:not(.collapse) .body_content-list {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}

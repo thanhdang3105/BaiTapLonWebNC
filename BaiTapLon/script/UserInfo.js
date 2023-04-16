@@ -522,6 +522,10 @@ window.addEventListener("DOMContentLoaded", async () => {
         element: element['user_info'].element
     }
     setActiveTab()
+    if (window.innerWidth <= 992) {
+        const btnCollapse = document.getElementById('collapseSiderBar')
+        btnCollapse.click();
+    }
 })
 
 function collapseSiderBar(event) {

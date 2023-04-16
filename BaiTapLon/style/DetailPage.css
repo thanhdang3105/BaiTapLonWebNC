@@ -127,4 +127,7 @@
     .container_body {
         padding: 20px;
     }
+    .content_list {
+        grid-template-columns: repeat(2, 1fr);
+    }
 }

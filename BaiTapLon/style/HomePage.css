@@ -119,4 +119,7 @@
     .container_body {
         padding: 20px;
     }
+    .box_content > .content_list {
+        grid-template-columns: repeat(2, 1fr);
+    }
 }

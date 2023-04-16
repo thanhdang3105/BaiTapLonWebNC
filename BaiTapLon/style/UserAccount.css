@@ -4,14 +4,26 @@
     align-items: center;
     justify-content: center;
     width: 100%;
-    height: 100vh;
+    min-height: 100vh;
     background-image: url("../images/bg_sach.jpg");
 }
 
+.back_home{
+    position: fixed;
+    top: 0;
+    left: 0;
+    padding: 50px;
+    font-size: 25px;
+    color: white;
+    z-index:9999;
+}
+
 .wrapper_body {
-    display: flex;
+    display: grid;
     margin: 0 auto;
     position: relative;
+    grid-template-columns: repeat(2,1fr);
+    grid-auto-rows: max-content;
     border: 2px solid var(--border-color);
     background-color: white;
 }
@@ -207,4 +219,94 @@ form > button {
     gap: 10px;
     background-color: white;
     z-index: 4;
+}
+
+
+@media screen and (max-width: 1024px){
+    .wrapper{
+        justify-content: flex-start;
+    }
+    .wrapper_body {
+        position: unset;
+        grid-template-columns: repeat(1,1fr);
+        grid-template-rows: repeat(2,1fr);
+    }
+    .switch_view{
+        display: none;
+    }
+    .body_content {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%,-50%);
+        z-index: 2;
+    }
+
+        .body_content:has(form#login) {
+            animation: fadeIn 0.5s linear forwards;
+        }
+
+        .body_content:has(form#register) {
+            animation: fadeOut 0.5s linear forwards;
+        }
+
+    .switch_view.right ~ .body_content:has(form#register) {
+        animation: fadeIn 0.5s linear forwards;
+    }
+
+    .switch_view.right ~ .body_content:has(form#login) {
+        animation: fadeOut 0.5s linear forwards;
+    }
+
+    .modal > form#forgotPassword {
+        width: 70%;
+    }
+}
+
+@keyframes fadeIn {
+    0%{
+        opacity: 0;
+    }
+    25%{
+        opacity: 0.2;
+        transform: translate(0%,-50%) scale(1.1);
+    }
+    50% {
+        opacity: 0.5;
+        transform: translate(-15%,-50%) scale(1.1);
+    }
+    75% {
+        opacity: 0.7;
+        transform: translate(-30%,-50%) scale(1.05);
+    }
+    100%{
+        opacity: 1;
+        transform: translate(-50%,-50%) scale(1);
+    }
+}
+
+@keyframes fadeOut {
+    0% {
+        opacity: 1;
+    }
+
+    25% {
+        opacity: 0.7;
+        transform: translate(-50%,-50%) scale(1.1);
+    }
+
+    50% {
+        opacity: 0.5;
+        transform: translate(-65%,-50%) scale(1.1);
+    }
+
+    75% {
+        opacity: 0.2;
+        transform: translate(-80%,-50%) scale(1.05);
+    }
+
+    100% {
+        opacity: 0;
+        transform: translate(-100%,-50%) scale(1);
+    }
 }

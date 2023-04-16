@@ -78,3 +78,10 @@ td.action_column i {
     background-color: var(--hover-color);
     cursor: pointer;
 }
+
+@media screen and (max-width: 768px) {
+
+    table {
+        width: max-content;
+    }
+}

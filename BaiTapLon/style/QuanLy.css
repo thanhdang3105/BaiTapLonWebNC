@@ -16,7 +16,8 @@
     }
 
     #form1{
-        width: 100%;
+        min-width: 100%;
+        width: max-content;
         min-height: 100vh;
         padding: 20px;
     }
@@ -28,9 +29,6 @@
         padding: 10px 20px;
     }
 
-.header > .header_title{
-
-}
 
 #form1 #tableSach {
     width: 100%;
@@ -66,4 +64,11 @@ td {
 
 .pagination_page {
     width: 50px;
+}
+
+@media screen and (max-width: 768px){
+
+    #form1 #tableSach {
+        width: max-content;
+    }
 }
