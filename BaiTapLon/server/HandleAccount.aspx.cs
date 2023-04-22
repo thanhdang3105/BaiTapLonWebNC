@@ -181,13 +181,17 @@ namespace BaiTapLon.server
             {
                 DateTime dt = Convert.ToDateTime(Session["lockExpriedAt"]);
                 int time = DateTime.Now.CompareTo(dt);
+                if(Session["lockExpriedAt"] != null && time > 0)
+                {
+                    Session["CountLoginFail"] = 0;
+                    Session["lockExpriedAt"] = null;
+                }
                 if (time < 0)
                 {
                     errorMsg = "Bạn nhập sai quá nhiều vui lòng quay lại sau: " + dt.ToLongTimeString() + "!";
                 }                           
                 else if (username != null && password != null)
                 {
-                    Session["CountLoginFail"] = 0;
                     Authorization BasicAuth = new Authorization(password);
 
                     SqlCommand cmd = procedure.selectAuthWithEmail(username, BasicAuth.textEncrypted);

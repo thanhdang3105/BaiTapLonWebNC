@@ -250,6 +250,10 @@
         const formData = new FormData(form);
         const button = form.querySelector('button[type=submit]')
         formData.set('action', form.target)
+        if (formData.get('category') === '' || formData.get('category') === 'newItem') {
+            button.disabled = true
+            return setErrorInfo('category', 'Vui lòng chọn thể loại!', true, 'select');
+        }
         const file = formData.get('imgSrc')
         let img = ""
         button.disabled = true
